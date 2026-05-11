@@ -33,7 +33,17 @@ font:
   - file: "gfonts://Roboto"
     id: font_bold
     size: 16
-    glyphs: " ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789:;.,°<>ĄąĆćĘęŁłŃńÓóŚśŹźŻż"
+    glyphs: " ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789:;.,°<>ĄąĆćĘęŁłŃńÓóŚśŹźŻż+-"
+
+  - file: "gfonts://Roboto"
+    id: font_temp_large
+    size: 48
+    glyphs: " 0123456789.,°C-"
+
+  - file: "gfonts://Roboto"
+    id: font_temp_small
+    size: 20
+    glyphs: " 0123456789.,°CwyłączonoGrzanieBezczynność-+"
 
 # ==========================================
 # IKONY
@@ -105,7 +115,7 @@ sensor:
       then:
         - lambda: |-
             char buf[32];
-            sprintf(buf, "Salon\n%.1f °C", x);
+            sprintf(buf, "Salon >\n%.1f °C", x);
             lv_label_set_text(id(label_temp_salon), buf);
 
   - platform: homeassistant
@@ -128,6 +138,44 @@ sensor:
             sprintf(buf, "Zewnątrz\n%.1f °C", x);
             lv_label_set_text(id(label_temp_zewnatrz), buf);
 
+  # --- TERMOSTAT VAILLANT ---
+  - platform: homeassistant
+    id: vaillant_current_temp
+    entity_id: climate.vaillant_salon
+    attribute: current_temperature
+    on_value:
+      then:
+        - lambda: |-
+            char buf[16];
+            sprintf(buf, "%.1f°C", x);
+            lv_label_set_text(id(thermo_current_temp), buf);
+
+  - platform: homeassistant
+    id: vaillant_target_temp
+    entity_id: climate.vaillant_salon
+    attribute: temperature
+    on_value:
+      then:
+        - lambda: |-
+            char buf[16];
+            sprintf(buf, "%.1f °C", x);
+            lv_label_set_text(id(thermo_target_temp), buf);
+            // Update arc value (range 5-30)
+            int val = (int)((x - 5.0) * 100.0 / 25.0);
+            if (val < 0) val = 0;
+            if (val > 100) val = 100;
+            lv_arc_set_value(id(thermo_arc), val);
+
+  - platform: homeassistant
+    id: vaillant_zadana_odczyt
+    entity_id: sensor.vaillant_zadana_temperatura_odczyt
+    on_value:
+      then:
+        - lambda: |-
+            char buf[32];
+            sprintf(buf, "Zadana: %.1f °C", x);
+            lv_label_set_text(id(thermo_zadana_label), buf);
+
 # ==========================================
 # TEXT SENSORY
 # ==========================================
@@ -143,6 +191,36 @@ text_sensor:
             } else {
               lv_label_set_text(id(timer_label), ("CZAS VIP: " + x).c_str());
             }
+
+  - platform: homeassistant
+    id: vaillant_hvac_action
+    entity_id: climate.vaillant_salon
+    attribute: hvac_action
+    on_value:
+      then:
+        - lambda: |-
+            std::string status;
+            if (x == "heating") {
+              status = "Grzanie";
+              lv_obj_set_style_text_color(id(thermo_status_label), lv_color_hex(0xFF6600), LV_PART_MAIN);
+              lv_obj_set_style_arc_color(id(thermo_arc), lv_color_hex(0xFF6600), LV_PART_INDICATOR);
+            } else if (x == "idle") {
+              status = "Bezczynność";
+              lv_obj_set_style_text_color(id(thermo_status_label), lv_color_hex(0x888888), LV_PART_MAIN);
+              lv_obj_set_style_arc_color(id(thermo_arc), lv_color_hex(0x005577), LV_PART_INDICATOR);
+            } else if (x == "off") {
+              status = "wyłączono";
+              lv_obj_set_style_text_color(id(thermo_status_label), lv_color_hex(0x666666), LV_PART_MAIN);
+              lv_obj_set_style_arc_color(id(thermo_arc), lv_color_hex(0x333333), LV_PART_INDICATOR);
+            } else {
+              status = x.c_str();
+              lv_obj_set_style_text_color(id(thermo_status_label), lv_color_hex(0x888888), LV_PART_MAIN);
+            }
+            lv_label_set_text(id(thermo_status_label), status.c_str());
+
+  - platform: homeassistant
+    id: vaillant_hvac_mode
+    entity_id: climate.vaillant_salon
 
 # ==========================================
 # BINARY SENSORS - PREMIUM VIP LOGIC
@@ -376,6 +454,38 @@ lvgl:
       shadow_color: 0xFFFF00
       shadow_width: 10
       shadow_opa: COVER
+    # --- STYL THERMOSTAT +/- BUTTONS ---
+    - id: style_thermo_btn
+      bg_color: 0x1A1A1A
+      bg_grad_color: 0x222222
+      bg_grad_dir: VER
+      radius: 20
+      border_width: 2
+      border_color: 0x444444
+      shadow_width: 0
+    - id: style_thermo_btn_pressed
+      bg_color: 0x002244
+      border_color: 0x00FFFF
+      border_width: 2
+      shadow_color: 0x00FFFF
+      shadow_width: 8
+      shadow_opa: COVER
+    # --- STYL THERMOSTAT POWER/FLAME ---
+    - id: style_thermo_mode_btn
+      bg_color: 0x1A1A1A
+      bg_grad_color: 0x222222
+      bg_grad_dir: VER
+      radius: 8
+      border_width: 1
+      border_color: 0x444444
+      shadow_width: 0
+    - id: style_thermo_mode_pressed
+      bg_color: 0x002200
+      border_color: 0x00FF88
+      border_width: 2
+      shadow_color: 0x00FF88
+      shadow_width: 8
+      shadow_opa: COVER
 
   pages:
     # ==========================================
@@ -603,7 +713,7 @@ lvgl:
                   x: 60
                   y: -20
 
-        # Salon / Vaillant
+        # Salon / Vaillant - NAVIGATE TO THERMOSTAT
         - button:
             id: tile_salon
             align: TOP_LEFT
@@ -611,15 +721,29 @@ lvgl:
             y: 110
             width: 110
             height: 100
-            styles: style_tile_default
+            bg_color: 0x0D0010
+            bg_grad_color: 0x1A0020
+            bg_grad_dir: VER
+            radius: 6
+            border_width: 1
+            border_color: 0x663300
             pressed:
-              styles: style_tile_pressed
+              bg_color: 0x1A0028
+              border_color: 0xFF6600
+              border_width: 2
+              shadow_color: 0xFF6600
+              shadow_width: 8
+              shadow_opa: COVER
+            on_click:
+              - lvgl.page.show: 
+                  id: thermostat_page
+                  animation: MOVE_LEFT
             widgets:
               - label:
                   id: label_temp_salon
-                  text: "Salon\n-- °C"
+                  text: "Salon >\n-- °C"
                   text_font: font_labels
-                  text_color: 0x00AACC
+                  text_color: 0xFF8800
                   align: CENTER
                   text_align: CENTER
                   transform_rotation: 90
@@ -671,3 +795,200 @@ lvgl:
                   transform_rotation: 90
                   x: 60
                   y: -20
+
+    # ==========================================
+    # STRONA 3: TERMOSTAT VAILLANT SALON
+    # ==========================================
+    - id: thermostat_page
+      bg_color: 0x0A0A0A
+      scrollable: false
+      widgets:
+
+        # --- TYTUŁ "Vaillant Salon" ---
+        - label:
+            id: thermo_title
+            text: "Vaillant Salon"
+            text_font: font_temp_small
+            text_color: 0xFFFFFF
+            align: TOP_MID
+            y: 8
+
+        # --- STATUS (wyłączono / Grzanie / Bezczynność) ---
+        - label:
+            id: thermo_status_label
+            text: "wyłączono"
+            text_font: font_labels
+            text_color: 0x666666
+            align: TOP_MID
+            y: 35
+
+        # --- ARC (pierścień termostatu) ---
+        - arc:
+            id: thermo_arc
+            align: CENTER
+            x: 0
+            y: -5
+            width: 170
+            height: 170
+            min_value: 0
+            max_value: 100
+            value: 50
+            start_angle: 135
+            end_angle: 45
+            rotation: 0
+            adjustable: false
+            arc_color: 0x222222
+            arc_width: 8
+            indicator:
+              arc_color: 0x005577
+              arc_width: 8
+
+        # --- DUŻA TEMPERATURA AKTUALNA ---
+        - label:
+            id: thermo_current_temp
+            text: "--.-°C"
+            text_font: font_temp_large
+            text_color: 0xFFFFFF
+            align: CENTER
+            y: -10
+
+        # --- MAŁA TEMPERATURA ZADANA (z ikoną) ---
+        - label:
+            id: thermo_target_temp
+            text: "--.- °C"
+            text_font: font_temp_small
+            text_color: 0x00AACC
+            align: CENTER
+            y: 30
+
+        # --- LABEL "Zadana na sterowniku" ---
+        - label:
+            id: thermo_zadana_label
+            text: "Zadana: -- °C"
+            text_font: font_labels
+            text_color: 0xFF9800
+            align: BOTTOM_MID
+            y: -60
+
+        # --- PRZYCISK MINUS (-) ---
+        - button:
+            id: btn_thermo_minus
+            align: BOTTOM_LEFT
+            x: 60
+            y: -15
+            width: 44
+            height: 44
+            styles: style_thermo_btn
+            pressed:
+              styles: style_thermo_btn_pressed
+            on_click:
+              - homeassistant.service:
+                  service: climate.set_temperature
+                  data:
+                    entity_id: climate.vaillant_salon
+                  data_template:
+                    temperature: "{{ state_attr('climate.vaillant_salon', 'temperature') | float - 0.5 }}"
+            widgets:
+              - label:
+                  text: "-"
+                  text_font: font_timer
+                  text_color: 0xFFFFFF
+                  align: CENTER
+
+        # --- PRZYCISK PLUS (+) ---
+        - button:
+            id: btn_thermo_plus
+            align: BOTTOM_RIGHT
+            x: -60
+            y: -15
+            width: 44
+            height: 44
+            styles: style_thermo_btn
+            pressed:
+              styles: style_thermo_btn_pressed
+            on_click:
+              - homeassistant.service:
+                  service: climate.set_temperature
+                  data:
+                    entity_id: climate.vaillant_salon
+                  data_template:
+                    temperature: "{{ state_attr('climate.vaillant_salon', 'temperature') | float + 0.5 }}"
+            widgets:
+              - label:
+                  text: "+"
+                  text_font: font_timer
+                  text_color: 0xFFFFFF
+                  align: CENTER
+
+        # --- PRZYCISK POWER (ON/OFF) ---
+        - button:
+            id: btn_thermo_power
+            align: BOTTOM_LEFT
+            x: 10
+            y: -15
+            width: 44
+            height: 44
+            styles: style_thermo_mode_btn
+            pressed:
+              styles: style_thermo_mode_pressed
+            on_click:
+              - homeassistant.service:
+                  service: climate.turn_off
+                  data:
+                    entity_id: climate.vaillant_salon
+            widgets:
+              - label:
+                  text: "O"
+                  text_font: font_timer
+                  text_color: 0x00FF88
+                  align: CENTER
+
+        # --- PRZYCISK HEAT (Płomień) ---
+        - button:
+            id: btn_thermo_heat
+            align: BOTTOM_RIGHT
+            x: -10
+            y: -15
+            width: 44
+            height: 44
+            styles: style_thermo_mode_btn
+            pressed:
+              styles: style_thermo_mode_pressed
+            on_click:
+              - homeassistant.service:
+                  service: climate.set_hvac_mode
+                  data:
+                    entity_id: climate.vaillant_salon
+                    hvac_mode: heat
+            widgets:
+              - label:
+                  text: "H"
+                  text_font: font_timer
+                  text_color: 0xFF6600
+                  align: CENTER
+
+        # --- PRZYCISK POWRÓT (do weather_page) ---
+        - button:
+            id: btn_thermo_back
+            align: TOP_LEFT
+            x: 5
+            y: 5
+            width: 40
+            height: 30
+            bg_color: 0x1A1A1A
+            radius: 6
+            border_width: 1
+            border_color: 0x444444
+            pressed:
+              bg_color: 0x002244
+              border_color: 0x00FFFF
+            on_click:
+              - lvgl.page.show:
+                  id: weather_page
+                  animation: MOVE_RIGHT
+            widgets:
+              - label:
+                  text: "<"
+                  text_font: font_timer
+                  text_color: 0x00AACC
+                  align: CENTER
