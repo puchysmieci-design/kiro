@@ -798,25 +798,31 @@ lvgl:
 
     # ==========================================
     # STRONA 3: TERMOSTAT + VIP BUTTONS
-    # Ekran: 240w x 320h (swap_xy)
-    # Lewa 67% (x=5, w=155): Termostat z arc + info + przyciski +/-
-    # Prawa 33% (x=165, w=70): 3x VIP (Góra, Dół, Dom)
+    # Mapowanie osi (fizyczny portrait, USB dół):
+    #   LVGL x → pion fizyczny (0=dół, 240=góra)
+    #   LVGL y → poziom fizyczny (0=lewa, 320=prawa)
+    #   LVGL width → fizyczna wysokość elementu
+    #   LVGL height → fizyczna szerokość elementu
+    #
+    # VIP kolumna (prawa): y=215, height=100 (fiz.szer.100px)
+    #   3 przyciski: width=78, x=162/82/2 (góra/środek/dół)
+    # Termostat (lewa): y=5, height=205 (fiz.szer.205px)
     # ==========================================
     - id: thermostat_page
       bg_color: 0x000000
       scrollable: false
       widgets:
 
-        # ======= LEWA KOLUMNA: TERMOSTAT (67%) =======
+        # ======= TERMOSTAT (lewa strona fizycznie, y=5-210) =======
 
         # --- PRZYCISK POWRÓT ---
         - button:
             id: btn_thermo_back
             align: TOP_LEFT
-            x: 5
+            x: 210
             y: 5
-            width: 30
-            height: 60
+            width: 28
+            height: 50
             bg_color: 0x0D0010
             radius: 8
             border_width: 1
@@ -843,8 +849,8 @@ lvgl:
             text_font: font_labels
             text_color: 0xFFFFFF
             align: TOP_LEFT
-            x: 5
-            y: 75
+            x: 215
+            y: 60
             transform_rotation: 90
 
         # --- STATUS ---
@@ -854,18 +860,18 @@ lvgl:
             text_font: font_labels
             text_color: 0x666666
             align: TOP_LEFT
-            x: 25
-            y: 80
+            x: 195
+            y: 70
             transform_rotation: 90
 
         # --- ARC (pierścień termostatu) ---
         - arc:
             id: thermo_arc
             align: TOP_LEFT
-            x: 35
-            y: 55
-            width: 120
-            height: 120
+            x: 50
+            y: 25
+            width: 140
+            height: 165
             min_value: 0
             max_value: 100
             value: 50
@@ -886,8 +892,8 @@ lvgl:
             text_font: font_timer
             text_color: 0xFFFFFF
             align: TOP_LEFT
-            x: 75
-            y: 95
+            x: 130
+            y: 80
             transform_rotation: 90
 
         # --- TEMPERATURA ZADANA ---
@@ -897,8 +903,8 @@ lvgl:
             text_font: font_labels
             text_color: 0x00AACC
             align: TOP_LEFT
-            x: 100
-            y: 100
+            x: 105
+            y: 85
             transform_rotation: 90
 
         # --- LABEL "Zadana na sterowniku" ---
@@ -908,18 +914,18 @@ lvgl:
             text_font: font_labels
             text_color: 0xFF9800
             align: TOP_LEFT
-            x: 120
-            y: 90
+            x: 30
+            y: 70
             transform_rotation: 90
 
-        # --- PRZYCISK MINUS (-) ---
+        # --- PRZYCISK MINUS (-) fizycznie na dole termostatu ---
         - button:
             id: btn_thermo_minus
             align: TOP_LEFT
-            x: 140
+            x: 2
             y: 5
-            width: 20
-            height: 50
+            width: 45
+            height: 45
             styles: style_thermo_btn
             pressed:
               styles: style_thermo_btn_pressed
@@ -937,14 +943,14 @@ lvgl:
                   text_color: 0xFFFFFF
                   align: CENTER
 
-        # --- PRZYCISK PLUS (+) ---
+        # --- PRZYCISK PLUS (+) fizycznie na górze termostatu ---
         - button:
             id: btn_thermo_plus
             align: TOP_LEFT
-            x: 140
-            y: 265
-            width: 20
-            height: 50
+            x: 2
+            y: 160
+            width: 45
+            height: 45
             styles: style_thermo_btn
             pressed:
               styles: style_thermo_btn_pressed
@@ -962,17 +968,18 @@ lvgl:
                   text_color: 0xFFFFFF
                   align: CENTER
 
-        # ======= KOLUMNA VIP BUTTONS (pionowo, stałe y=215) =======
-        # x kontroluje pozycję pionową: większe x = wyżej, mniejsze x = niżej
-        # Kolejność od góry: GÓRA(x=165), DÓŁ(x=90), DOM(x=15)
+        # ======= VIP BUTTONS (prawa kolumna fizycznie) =======
+        # Stałe y=215, height=100 (fizyczna szerokość kolumny)
+        # width=78 (fizyczna wysokość, max wypełnienie: 3*78+6gap=240)
+        # x: 162(góra), 82(środek), 2(dół)
 
-        # --- VIP GÓRA (na górze) ---
+        # --- VIP GÓRA (na górze fizycznie) ---
         - button:
             id: btn_gora_t
             align: TOP_LEFT
-            x: 165
+            x: 162
             y: 215
-            width: 70
+            width: 78
             height: 100
             styles: style_btn_vip_default
             pressed:
@@ -981,24 +988,24 @@ lvgl:
               - homeassistant.service:
                   service: script.vip_dogrzewanie_gory_1h
             widgets:
-              - image: {src: img_gora, align: CENTER, transform_rotation: 90, x: 15}
+              - image: {src: img_gora, align: CENTER, transform_rotation: 90, x: 8}
               - label:
                   id: label_gora_t
-                  text: "VIP\nGÓRA"
+                  text: "GÓRA"
                   text_font: font_labels
                   text_color: 0x00AACC
                   align: CENTER
                   text_align: CENTER
                   transform_rotation: 90
-                  x: 40
+                  x: 35
 
-        # --- VIP DÓŁ (środek) ---
+        # --- VIP DÓŁ (środek fizycznie) ---
         - button:
             id: btn_dol_t
             align: TOP_LEFT
-            x: 90
+            x: 82
             y: 215
-            width: 70
+            width: 78
             height: 100
             styles: style_btn_vip_default
             pressed:
@@ -1007,24 +1014,24 @@ lvgl:
               - homeassistant.service:
                   service: script.vip_dogrzewanie_dolu_1h
             widgets:
-              - image: {src: img_dol, align: CENTER, transform_rotation: 90, x: 15}
+              - image: {src: img_dol, align: CENTER, transform_rotation: 90, x: 8}
               - label:
                   id: label_dol_t
-                  text: "VIP\nDÓŁ"
+                  text: "DÓŁ"
                   text_font: font_labels
                   text_color: 0x00AACC
                   align: CENTER
                   text_align: CENTER
                   transform_rotation: 90
-                  x: 40
+                  x: 35
 
-        # --- VIP DOM (na dole) ---
+        # --- VIP DOM (na dole fizycznie) ---
         - button:
             id: btn_dom_t
             align: TOP_LEFT
-            x: 15
+            x: 2
             y: 215
-            width: 70
+            width: 78
             height: 100
             styles: style_btn_vip_default
             pressed:
@@ -1033,13 +1040,13 @@ lvgl:
               - homeassistant.service:
                   service: script.vip_dogrzewanie_domu_1h
             widgets:
-              - image: {src: img_dom, align: CENTER, transform_rotation: 90, x: 15}
+              - image: {src: img_dom, align: CENTER, transform_rotation: 90, x: 8}
               - label:
                   id: label_dom_t
-                  text: "VIP\nDOM"
+                  text: "DOM"
                   text_font: font_labels
                   text_color: 0x00AACC
                   align: CENTER
                   text_align: CENTER
                   transform_rotation: 90
-                  x: 40
+                  x: 35
