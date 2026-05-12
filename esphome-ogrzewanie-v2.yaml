@@ -1,0 +1,1092 @@
+esphome:
+  name: esphome-web-5c9a6c
+  friendly_name: ESP Ogrzewanie
+  on_boot:
+    priority: -100
+    then:
+      - light.turn_on:
+          id: backlight_light
+          brightness: 80%
+
+esp32:
+  board: esp32dev
+  framework:
+    type: arduino
+
+logger:
+  level: INFO
+
+# ==========================================
+# CZCIONKI
+# ==========================================
+font:
+  - file: "gfonts://Roboto"
+    id: font_labels 
+    size: 16
+    glyphs: " ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789:;.,°<>ĄąĆćĘęŁłŃńÓóŚśŹźŻż"
+  
+  - file: "gfonts://Roboto"
+    id: font_timer 
+    size: 24
+    glyphs: " ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789:;.,°<>ĄąĆćĘęŁłŃńÓóŚśŹźŻż+-"
+
+  - file: "gfonts://Roboto"
+    id: font_bold
+    size: 16
+    glyphs: " ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789:;.,°<>ĄąĆćĘęŁłŃńÓóŚśŹźŻż+-"
+
+  - file: "gfonts://Roboto"
+    id: font_temp_large
+    size: 48
+    glyphs: " 0123456789.,°C-"
+
+  - file: "gfonts://Roboto"
+    id: font_temp_small
+    size: 20
+    glyphs: " ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789:;.,°<>ĄąĆćĘęŁłŃńÓóŚśŹźŻż+-"
+
+# ==========================================
+# IKONY
+# ==========================================
+image:
+  - file: "radiator-custom.png"
+    id: img_gora
+    type: RGB565
+    transparency: alpha_channel
+  - file: "heating-coil-custom.png"
+    id: img_dol
+    type: RGB565
+    transparency: alpha_channel
+  - file: "home-thermometer-custom.png"
+    id: img_dom
+    type: RGB565
+    transparency: alpha_channel
+
+# ==========================================
+# WIFI
+# ==========================================
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+
+api:
+ota:
+  - platform: esphome
+
+# ==========================================
+# SENSORY Z HA
+# ==========================================
+sensor:
+  - platform: homeassistant
+    id: temp_sypialnia
+    entity_id: sensor.srednia_temperatura_sypialni
+    on_value:
+      then:
+        - lambda: |-
+            char buf[32];
+            sprintf(buf, "< Sypialnia\n%.1f °C", x);
+            lv_label_set_text(id(label_temp_sypialnia), buf);
+
+  - platform: homeassistant
+    id: temp_sara
+    entity_id: sensor.srednia_temperatura_u_sary
+    on_value:
+      then:
+        - lambda: |-
+            char buf[32];
+            sprintf(buf, "U Sary\n%.1f °C", x);
+            lv_label_set_text(id(label_temp_sara), buf);
+
+  - platform: homeassistant
+    id: temp_biuro
+    entity_id: sensor.srednia_temperatura_biuro
+    on_value:
+      then:
+        - lambda: |-
+            char buf[32];
+            sprintf(buf, "Biuro\n%.1f °C", x);
+            lv_label_set_text(id(label_temp_biuro), buf);
+
+  - platform: homeassistant
+    id: temp_salon
+    entity_id: climate.vaillant_salon
+    attribute: current_temperature
+    on_value:
+      then:
+        - lambda: |-
+            char buf[32];
+            sprintf(buf, "Salon >\n%.1f °C", x);
+            lv_label_set_text(id(label_temp_salon), buf);
+
+  - platform: homeassistant
+    id: temp_th06
+    entity_id: sensor.th06_2_temperatura
+    on_value:
+      then:
+        - lambda: |-
+            char buf[32];
+            sprintf(buf, "TH06\n%.1f °C", x);
+            lv_label_set_text(id(label_temp_th06), buf);
+
+  - platform: homeassistant
+    id: temp_zewnatrz
+    entity_id: sensor.ebusd_broadcast_outsidetemp
+    on_value:
+      then:
+        - lambda: |-
+            char buf[32];
+            sprintf(buf, "Zewnątrz\n%.1f °C", x);
+            lv_label_set_text(id(label_temp_zewnatrz), buf);
+
+  # --- TERMOSTAT VAILLANT ---
+  - platform: homeassistant
+    id: vaillant_current_temp
+    entity_id: climate.vaillant_salon
+    attribute: current_temperature
+    on_value:
+      then:
+        - lambda: |-
+            char buf[16];
+            sprintf(buf, "%.1f°C", x);
+            lv_label_set_text(id(thermo_current_temp), buf);
+            float target = id(vaillant_target_temp).state;
+            if (!isnan(target) && x > target) {
+              lv_obj_set_style_arc_color(id(thermo_arc), lv_color_hex(0xFF6600), LV_PART_INDICATOR);
+              lv_obj_set_style_text_color(id(thermo_current_temp), lv_color_hex(0xFF6600), LV_PART_MAIN);
+            } else {
+              lv_obj_set_style_arc_color(id(thermo_arc), lv_color_hex(0x005577), LV_PART_INDICATOR);
+              lv_obj_set_style_text_color(id(thermo_current_temp), lv_color_hex(0xFFFFFF), LV_PART_MAIN);
+            }
+
+  - platform: homeassistant
+    id: vaillant_target_temp
+    entity_id: climate.vaillant_salon
+    attribute: temperature
+    on_value:
+      then:
+        - lambda: |-
+            char buf[16];
+            sprintf(buf, "%.1f °C", x);
+            lv_label_set_text(id(thermo_target_temp), buf);
+            // Update arc value (range 5-30)
+            int val = (int)((x - 5.0) * 100.0 / 25.0);
+            if (val < 0) val = 0;
+            if (val > 100) val = 100;
+            lv_arc_set_value(id(thermo_arc), val);
+
+  - platform: homeassistant
+    id: vaillant_zadana_odczyt
+    entity_id: sensor.vaillant_zadana_temperatura_odczyt
+    on_value:
+      then:
+        - lambda: |-
+            char buf[32];
+            sprintf(buf, "Zadana: %.1f °C", x);
+            lv_label_set_text(id(thermo_zadana_label), buf);
+
+# ==========================================
+# TEXT SENSORY
+# ==========================================
+text_sensor:
+  - platform: homeassistant
+    id: timer_status
+    entity_id: sensor.esphome_czas_vip_odliczanie
+    on_value:
+      then:
+        - lambda: |-
+            if (x == "idle" || x == "GOTOWY") {
+              lv_label_set_text(id(timer_label), "CZAS VIP: GOTOWY");
+            } else {
+              lv_label_set_text(id(timer_label), ("CZAS VIP: " + x).c_str());
+            }
+
+  - platform: homeassistant
+    id: vaillant_hvac_action
+    entity_id: climate.vaillant_salon
+    attribute: hvac_action
+    on_value:
+      then:
+        - lambda: |-
+            std::string status;
+            if (x == "heating") {
+              status = "Grzanie";
+              lv_obj_set_style_text_color(id(thermo_status_label), lv_color_hex(0xFF6600), LV_PART_MAIN);
+              lv_obj_set_style_arc_color(id(thermo_arc), lv_color_hex(0xFF6600), LV_PART_INDICATOR);
+            } else if (x == "idle") {
+              status = "Bezczynność";
+              lv_obj_set_style_text_color(id(thermo_status_label), lv_color_hex(0x888888), LV_PART_MAIN);
+              lv_obj_set_style_arc_color(id(thermo_arc), lv_color_hex(0x005577), LV_PART_INDICATOR);
+            } else if (x == "off") {
+              status = "wyłączono";
+              lv_obj_set_style_text_color(id(thermo_status_label), lv_color_hex(0x666666), LV_PART_MAIN);
+              lv_obj_set_style_arc_color(id(thermo_arc), lv_color_hex(0x333333), LV_PART_INDICATOR);
+            } else {
+              status = x.c_str();
+              lv_obj_set_style_text_color(id(thermo_status_label), lv_color_hex(0x888888), LV_PART_MAIN);
+            }
+            lv_label_set_text(id(thermo_status_label), status.c_str());
+
+  - platform: homeassistant
+    id: vaillant_hvac_mode
+    entity_id: climate.vaillant_salon
+
+# ==========================================
+# BINARY SENSORS - PREMIUM VIP LOGIC
+# Stan ON:  Magenta glow + jaśniejsze tło + grubszy border
+# Stan OFF: Cyan subtletny + ciemne tło + cienki border
+# ==========================================
+binary_sensor:
+  - platform: homeassistant
+    id: state_vip_gora
+    entity_id: input_boolean.vip_gora
+    on_state:
+      then:
+        - lambda: |-
+            if (x) {
+              // AKTYWNY - premium magenta glow
+              lv_obj_set_style_bg_color(id(btn_gora), lv_color_hex(0x1A0020), LV_PART_MAIN);
+              lv_obj_set_style_bg_grad_color(id(btn_gora), lv_color_hex(0x330044), LV_PART_MAIN);
+              lv_obj_set_style_bg_grad_dir(id(btn_gora), LV_GRAD_DIR_VER, LV_PART_MAIN);
+              lv_obj_set_style_border_color(id(btn_gora), lv_color_hex(0xFF00FF), LV_PART_MAIN);
+              lv_obj_set_style_border_width(id(btn_gora), 3, LV_PART_MAIN);
+              lv_obj_set_style_shadow_color(id(btn_gora), lv_color_hex(0xFF00FF), LV_PART_MAIN);
+              lv_obj_set_style_shadow_width(id(btn_gora), 15, LV_PART_MAIN);
+              lv_obj_set_style_shadow_spread(id(btn_gora), 2, LV_PART_MAIN);
+              lv_obj_set_style_shadow_opa(id(btn_gora), LV_OPA_60, LV_PART_MAIN);
+              lv_obj_set_style_text_color(id(label_gora), lv_color_hex(0xFF66FF), LV_PART_MAIN);
+              // Thermostat page VIP button
+              lv_obj_set_style_bg_color(id(btn_gora_t), lv_color_hex(0x1A0020), LV_PART_MAIN);
+              lv_obj_set_style_border_color(id(btn_gora_t), lv_color_hex(0xFF00FF), LV_PART_MAIN);
+              lv_obj_set_style_border_width(id(btn_gora_t), 3, LV_PART_MAIN);
+              lv_obj_set_style_text_color(id(label_gora_t), lv_color_hex(0xFF66FF), LV_PART_MAIN);
+            } else {
+              // NIEAKTYWNY - subtelny cyan
+              lv_obj_set_style_bg_color(id(btn_gora), lv_color_hex(0x0A0A14), LV_PART_MAIN);
+              lv_obj_set_style_bg_grad_color(id(btn_gora), lv_color_hex(0x0D1117), LV_PART_MAIN);
+              lv_obj_set_style_bg_grad_dir(id(btn_gora), LV_GRAD_DIR_VER, LV_PART_MAIN);
+              lv_obj_set_style_border_color(id(btn_gora), lv_color_hex(0x005577), LV_PART_MAIN);
+              lv_obj_set_style_border_width(id(btn_gora), 1, LV_PART_MAIN);
+              lv_obj_set_style_shadow_width(id(btn_gora), 0, LV_PART_MAIN);
+              lv_obj_set_style_text_color(id(label_gora), lv_color_hex(0x00AACC), LV_PART_MAIN);
+              // Thermostat page VIP button
+              lv_obj_set_style_bg_color(id(btn_gora_t), lv_color_hex(0x0A0A14), LV_PART_MAIN);
+              lv_obj_set_style_border_color(id(btn_gora_t), lv_color_hex(0x005577), LV_PART_MAIN);
+              lv_obj_set_style_border_width(id(btn_gora_t), 1, LV_PART_MAIN);
+              lv_obj_set_style_text_color(id(label_gora_t), lv_color_hex(0x00AACC), LV_PART_MAIN);
+            }
+
+  - platform: homeassistant
+    id: state_vip_dol
+    entity_id: input_boolean.vip_dol
+    on_state:
+      then:
+        - lambda: |-
+            if (x) {
+              // AKTYWNY - premium magenta glow
+              lv_obj_set_style_bg_color(id(btn_dol), lv_color_hex(0x1A0020), LV_PART_MAIN);
+              lv_obj_set_style_bg_grad_color(id(btn_dol), lv_color_hex(0x330044), LV_PART_MAIN);
+              lv_obj_set_style_bg_grad_dir(id(btn_dol), LV_GRAD_DIR_VER, LV_PART_MAIN);
+              lv_obj_set_style_border_color(id(btn_dol), lv_color_hex(0xFF00FF), LV_PART_MAIN);
+              lv_obj_set_style_border_width(id(btn_dol), 3, LV_PART_MAIN);
+              lv_obj_set_style_shadow_color(id(btn_dol), lv_color_hex(0xFF00FF), LV_PART_MAIN);
+              lv_obj_set_style_shadow_width(id(btn_dol), 15, LV_PART_MAIN);
+              lv_obj_set_style_shadow_spread(id(btn_dol), 2, LV_PART_MAIN);
+              lv_obj_set_style_shadow_opa(id(btn_dol), LV_OPA_60, LV_PART_MAIN);
+              lv_obj_set_style_text_color(id(label_dol), lv_color_hex(0xFF66FF), LV_PART_MAIN);
+              // Thermostat page VIP button
+              lv_obj_set_style_bg_color(id(btn_dol_t), lv_color_hex(0x1A0020), LV_PART_MAIN);
+              lv_obj_set_style_border_color(id(btn_dol_t), lv_color_hex(0xFF00FF), LV_PART_MAIN);
+              lv_obj_set_style_border_width(id(btn_dol_t), 3, LV_PART_MAIN);
+              lv_obj_set_style_text_color(id(label_dol_t), lv_color_hex(0xFF66FF), LV_PART_MAIN);
+            } else {
+              // NIEAKTYWNY - subtelny cyan
+              lv_obj_set_style_bg_color(id(btn_dol), lv_color_hex(0x0A0A14), LV_PART_MAIN);
+              lv_obj_set_style_bg_grad_color(id(btn_dol), lv_color_hex(0x0D1117), LV_PART_MAIN);
+              lv_obj_set_style_bg_grad_dir(id(btn_dol), LV_GRAD_DIR_VER, LV_PART_MAIN);
+              lv_obj_set_style_border_color(id(btn_dol), lv_color_hex(0x005577), LV_PART_MAIN);
+              lv_obj_set_style_border_width(id(btn_dol), 1, LV_PART_MAIN);
+              lv_obj_set_style_shadow_width(id(btn_dol), 0, LV_PART_MAIN);
+              lv_obj_set_style_text_color(id(label_dol), lv_color_hex(0x00AACC), LV_PART_MAIN);
+              // Thermostat page VIP button
+              lv_obj_set_style_bg_color(id(btn_dol_t), lv_color_hex(0x0A0A14), LV_PART_MAIN);
+              lv_obj_set_style_border_color(id(btn_dol_t), lv_color_hex(0x005577), LV_PART_MAIN);
+              lv_obj_set_style_border_width(id(btn_dol_t), 1, LV_PART_MAIN);
+              lv_obj_set_style_text_color(id(label_dol_t), lv_color_hex(0x00AACC), LV_PART_MAIN);
+            }
+
+  - platform: homeassistant
+    id: state_vip_dom
+    entity_id: input_boolean.vip_dom
+    on_state:
+      then:
+        - lambda: |-
+            if (x) {
+              // AKTYWNY - premium magenta glow
+              lv_obj_set_style_bg_color(id(btn_dom), lv_color_hex(0x1A0020), LV_PART_MAIN);
+              lv_obj_set_style_bg_grad_color(id(btn_dom), lv_color_hex(0x330044), LV_PART_MAIN);
+              lv_obj_set_style_bg_grad_dir(id(btn_dom), LV_GRAD_DIR_VER, LV_PART_MAIN);
+              lv_obj_set_style_border_color(id(btn_dom), lv_color_hex(0xFF00FF), LV_PART_MAIN);
+              lv_obj_set_style_border_width(id(btn_dom), 3, LV_PART_MAIN);
+              lv_obj_set_style_shadow_color(id(btn_dom), lv_color_hex(0xFF00FF), LV_PART_MAIN);
+              lv_obj_set_style_shadow_width(id(btn_dom), 15, LV_PART_MAIN);
+              lv_obj_set_style_shadow_spread(id(btn_dom), 2, LV_PART_MAIN);
+              lv_obj_set_style_shadow_opa(id(btn_dom), LV_OPA_60, LV_PART_MAIN);
+              lv_obj_set_style_text_color(id(label_dom), lv_color_hex(0xFF66FF), LV_PART_MAIN);
+              // Thermostat page VIP button
+              lv_obj_set_style_bg_color(id(btn_dom_t), lv_color_hex(0x1A0020), LV_PART_MAIN);
+              lv_obj_set_style_border_color(id(btn_dom_t), lv_color_hex(0xFF00FF), LV_PART_MAIN);
+              lv_obj_set_style_border_width(id(btn_dom_t), 3, LV_PART_MAIN);
+              lv_obj_set_style_text_color(id(label_dom_t), lv_color_hex(0xFF66FF), LV_PART_MAIN);
+            } else {
+              // NIEAKTYWNY - subtelny cyan
+              lv_obj_set_style_bg_color(id(btn_dom), lv_color_hex(0x0A0A14), LV_PART_MAIN);
+              lv_obj_set_style_bg_grad_color(id(btn_dom), lv_color_hex(0x0D1117), LV_PART_MAIN);
+              lv_obj_set_style_bg_grad_dir(id(btn_dom), LV_GRAD_DIR_VER, LV_PART_MAIN);
+              lv_obj_set_style_border_color(id(btn_dom), lv_color_hex(0x005577), LV_PART_MAIN);
+              lv_obj_set_style_border_width(id(btn_dom), 1, LV_PART_MAIN);
+              lv_obj_set_style_shadow_width(id(btn_dom), 0, LV_PART_MAIN);
+              lv_obj_set_style_text_color(id(label_dom), lv_color_hex(0x00AACC), LV_PART_MAIN);
+              // Thermostat page VIP button
+              lv_obj_set_style_bg_color(id(btn_dom_t), lv_color_hex(0x0A0A14), LV_PART_MAIN);
+              lv_obj_set_style_border_color(id(btn_dom_t), lv_color_hex(0x005577), LV_PART_MAIN);
+              lv_obj_set_style_border_width(id(btn_dom_t), 1, LV_PART_MAIN);
+              lv_obj_set_style_text_color(id(label_dom_t), lv_color_hex(0x00AACC), LV_PART_MAIN);
+            }
+
+# ==========================================
+# HARDWARE
+# ==========================================
+spi:
+  - id: spi_display
+    clk_pin: GPIO14
+    mosi_pin: GPIO13
+  - id: spi_touch
+    clk_pin: GPIO25
+    mosi_pin: GPIO32
+    miso_pin: GPIO39
+
+output:
+  - platform: ledc
+    pin: GPIO21
+    id: backlight_pwm
+
+light:
+  - platform: monochromatic
+    output: backlight_pwm
+    id: backlight_light
+    restore_mode: ALWAYS_ON
+
+display:
+  - platform: ili9xxx
+    model: ILI9341
+    id: my_display
+    spi_id: spi_display
+    cs_pin: GPIO15
+    dc_pin: GPIO2
+    reset_pin: GPIO4
+    invert_colors: false 
+    color_order: bgr
+    transform:
+      swap_xy: true
+
+touchscreen:
+  - platform: xpt2046
+    id: my_touch
+    spi_id: spi_touch
+    cs_pin: GPIO33
+    update_interval: 50ms
+    transform:
+      mirror_y: true
+    calibration:
+      x_min: 200
+      x_max: 3800
+      y_min: 200
+      y_max: 3800
+    on_touch:
+      - if:
+          condition:
+            light.is_off: backlight_light
+          then:
+            - light.turn_on:
+                id: backlight_light
+                brightness: 80%
+
+# ==========================================
+# LVGL GRAFIKA - PREMIUM CYBERPUNK UI
+# ==========================================
+lvgl:
+  buffer_size: 20%
+  displays:
+    - my_display
+  touchscreens:
+    - my_touch
+  style_definitions:
+    # --- STYL BAZOWY DLA PRZYCISKÓW VIP ---
+    - id: style_btn_vip_default
+      bg_color: 0x0A0A14
+      bg_grad_color: 0x0D1117
+      bg_grad_dir: VER
+      radius: 8
+      border_width: 1
+      border_color: 0x005577
+      shadow_width: 0
+      pad_all: 4
+    # --- STYL PRESSED (dotknięcie) ---
+    - id: style_btn_vip_pressed
+      bg_color: 0x001122
+      bg_grad_color: 0x002244
+      bg_grad_dir: VER
+      border_color: 0x00FFFF
+      border_width: 2
+      shadow_color: 0x00FFFF
+      shadow_width: 8
+      shadow_spread: 1
+      shadow_opa: COVER
+    # --- STYL BAZOWY DLA KAFELKÓW TEMP ---
+    - id: style_tile_default
+      bg_color: 0x0A0A14
+      bg_grad_color: 0x0F1318
+      bg_grad_dir: VER
+      radius: 6
+      border_width: 1
+      border_color: 0x003344
+      shadow_width: 0
+      pad_all: 4
+    # --- STYL PRESSED DLA KAFELKÓW ---
+    - id: style_tile_pressed
+      bg_color: 0x001122
+      border_color: 0x00CCEE
+      border_width: 2
+      shadow_color: 0x00CCEE
+      shadow_width: 6
+      shadow_opa: COVER
+    # --- STYL TIMER PANEL ---
+    - id: style_timer_default
+      bg_color: 0x0D0010
+      bg_grad_color: 0x1A0028
+      bg_grad_dir: VER
+      radius: 8
+      border_width: 1
+      border_color: 0x660088
+      shadow_width: 0
+    - id: style_timer_pressed
+      bg_color: 0x1A0028
+      border_color: 0xFF00FF
+      border_width: 2
+      shadow_color: 0xFF00FF
+      shadow_width: 10
+      shadow_opa: COVER
+    # --- STYL SLEEP ---
+    - id: style_sleep_default
+      bg_color: 0x0A0A05
+      bg_grad_color: 0x141408
+      bg_grad_dir: VER
+      radius: 8
+      border_width: 1
+      border_color: 0x555500
+      shadow_width: 0
+    - id: style_sleep_pressed
+      bg_color: 0x1A1A00
+      border_color: 0xFFFF00
+      border_width: 2
+      shadow_color: 0xFFFF00
+      shadow_width: 10
+      shadow_opa: COVER
+    # --- STYL THERMOSTAT +/- BUTTONS ---
+    - id: style_thermo_btn
+      bg_color: 0x1A1A1A
+      bg_grad_color: 0x222222
+      bg_grad_dir: VER
+      radius: 20
+      border_width: 2
+      border_color: 0x444444
+      shadow_width: 0
+    - id: style_thermo_btn_pressed
+      bg_color: 0x002244
+      border_color: 0x00FFFF
+      border_width: 2
+      shadow_color: 0x00FFFF
+      shadow_width: 8
+      shadow_opa: COVER
+    # --- STYL THERMOSTAT POWER/FLAME ---
+    - id: style_thermo_mode_btn
+      bg_color: 0x1A1A1A
+      bg_grad_color: 0x222222
+      bg_grad_dir: VER
+      radius: 8
+      border_width: 1
+      border_color: 0x444444
+      shadow_width: 0
+    - id: style_thermo_mode_pressed
+      bg_color: 0x002200
+      border_color: 0x00FF88
+      border_width: 2
+      shadow_color: 0x00FF88
+      shadow_width: 8
+      shadow_opa: COVER
+
+  pages:
+    # ==========================================
+    # STRONA 1: VIP (Główna) - PREMIUM
+    # ==========================================
+    - id: main_page
+      bg_color: 0x000000 
+      scrollable: false 
+      widgets:
+        
+        # --- PRZEŁĄCZNIK NA STRONĘ 2 (TIMER) ---
+        - button:
+            id: timer_panel_bg
+            align: TOP_LEFT
+            x: 10        
+            y: 5        
+            width: 85 
+            height: 220
+            styles: style_timer_default
+            pressed:
+              styles: style_timer_pressed
+            on_click:
+              - lvgl.page.show: 
+                  id: weather_page
+                  animation: MOVE_LEFT
+            widgets:
+              - label:
+                  id: timer_label
+                  text: "ŁADOWANIE..." 
+                  text_font: font_timer
+                  text_color: 0xCC44FF
+                  align: CENTER
+                  x: 120    
+                  y: -90
+                  transform_rotation: 90
+
+        # --- PRZYCISK UŚPIENIA (Zzz) - PREMIUM ---
+        - button:
+            id: btn_sleep
+            align: TOP_LEFT
+            x: 10        
+            y: 225      
+            width: 85   
+            height: 90
+            styles: style_sleep_default
+            pressed:
+              styles: style_sleep_pressed
+            on_click:
+              - light.turn_off: backlight_light
+            widgets:
+              - label:
+                  text: "Zzz"
+                  text_font: font_timer
+                  text_color: 0xCCCC00
+                  align: CENTER
+                  x: 35 
+                  transform_rotation: 90
+
+        # --- PRZYCISK 1 (VIP GÓRA) - PREMIUM ---
+        - button:
+            id: btn_gora
+            align: TOP_LEFT
+            x: 105 
+            y: 5   
+            width: 125
+            height: 100
+            styles: style_btn_vip_default
+            pressed:
+              styles: style_btn_vip_pressed
+            on_click:
+              - homeassistant.service:
+                  service: script.vip_dogrzewanie_gory_1h
+            widgets:
+              - image: {src: img_gora, align: CENTER, transform_rotation: 90, x: 40}
+              - label:
+                  id: label_gora
+                  text: "VIP\nGÓRA" 
+                  text_font: font_labels
+                  text_color: 0x00AACC
+                  align: CENTER
+                  text_align: CENTER
+                  transform_rotation: 90
+                  x: 75 
+        
+        # --- PRZYCISK 2 (VIP DÓŁ) - PREMIUM ---
+        - button:
+            id: btn_dol
+            align: TOP_LEFT
+            x: 105  
+            y: 110 
+            width: 125
+            height: 100
+            styles: style_btn_vip_default
+            pressed:
+              styles: style_btn_vip_pressed
+            on_click:
+              - homeassistant.service:
+                  service: script.vip_dogrzewanie_dolu_1h
+            widgets:
+              - image: {src: img_dol, align: CENTER, transform_rotation: 90, x: 40}
+              - label:
+                  id: label_dol
+                  text: "VIP\nDÓŁ"
+                  text_font: font_labels
+                  text_color: 0x00AACC
+                  align: CENTER
+                  text_align: CENTER
+                  transform_rotation: 90 
+                  x: 72 
+        
+        # --- PRZYCISK 3 (VIP DOM) - PREMIUM ---
+        - button:
+            id: btn_dom
+            align: TOP_LEFT
+            x: 105  
+            y: 215 
+            width: 125
+            height: 100
+            styles: style_btn_vip_default
+            pressed:
+              styles: style_btn_vip_pressed
+            on_click:
+              - homeassistant.service:
+                  service: script.vip_dogrzewanie_domu_1h
+            widgets:
+              - image: {src: img_dom, align: CENTER, transform_rotation: 90, x: 40}
+              - label:
+                  id: label_dom
+                  text: "VIP\nDOM"
+                  text_font: font_labels
+                  text_color: 0x00AACC
+                  align: CENTER
+                  text_align: CENTER
+                  transform_rotation: 90 
+                  x: 74
+
+    # ==========================================
+    # STRONA 2: SENSORY TEMPERATURY - PREMIUM
+    # ==========================================
+    - id: weather_page
+      bg_color: 0x000000 
+      scrollable: false 
+      widgets:
+        
+        # Sypialnia - POWRÓT (Akcent Różowy)
+        - button:
+            id: tile_sypialnia
+            align: TOP_LEFT
+            x: 125
+            y: 215
+            width: 110
+            height: 100
+            bg_color: 0x0D0010
+            bg_grad_color: 0x1A0020
+            bg_grad_dir: VER
+            radius: 6
+            border_width: 1
+            border_color: 0x660088
+            pressed:
+              bg_color: 0x1A0028
+              border_color: 0xFF00FF
+              border_width: 2
+              shadow_color: 0xFF00FF
+              shadow_width: 8
+              shadow_opa: COVER
+            on_click:
+              - lvgl.page.show: 
+                  id: main_page
+                  animation: MOVE_RIGHT
+            widgets:
+              - label:
+                  id: label_temp_sypialnia
+                  text: "< Sypialnia\n-- °C"
+                  text_font: font_labels
+                  text_color: 0xCC44FF
+                  align: CENTER
+                  text_align: CENTER
+                  transform_rotation: 90
+                  x: 60
+                  y: -20
+
+        # U Sary
+        - button:
+            id: tile_sara
+            align: TOP_LEFT
+            x: 5
+            y: 215
+            width: 110
+            height: 100
+            styles: style_tile_default
+            pressed:
+              styles: style_tile_pressed
+            widgets:
+              - label:
+                  id: label_temp_sara
+                  text: "U Sary\n-- °C"
+                  text_font: font_labels
+                  text_color: 0x00AACC
+                  align: CENTER
+                  text_align: CENTER
+                  transform_rotation: 90
+                  x: 60
+                  y: -20
+
+        # Biuro
+        - button:
+            id: tile_biuro
+            align: TOP_LEFT
+            x: 125
+            y: 110
+            width: 110
+            height: 100
+            styles: style_tile_default
+            pressed:
+              styles: style_tile_pressed
+            widgets:
+              - label:
+                  id: label_temp_biuro
+                  text: "Biuro\n-- °C"
+                  text_font: font_labels
+                  text_color: 0x00AACC
+                  align: CENTER
+                  text_align: CENTER
+                  transform_rotation: 90
+                  x: 60
+                  y: -20
+
+        # Salon / Vaillant - NAVIGATE TO THERMOSTAT
+        - button:
+            id: tile_salon
+            align: TOP_LEFT
+            x: 5
+            y: 110
+            width: 110
+            height: 100
+            bg_color: 0x0D0010
+            bg_grad_color: 0x1A0020
+            bg_grad_dir: VER
+            radius: 6
+            border_width: 1
+            border_color: 0x663300
+            pressed:
+              bg_color: 0x1A0028
+              border_color: 0xFF6600
+              border_width: 2
+              shadow_color: 0xFF6600
+              shadow_width: 8
+              shadow_opa: COVER
+            on_click:
+              - lvgl.page.show: 
+                  id: thermostat_page
+                  animation: MOVE_LEFT
+            widgets:
+              - label:
+                  id: label_temp_salon
+                  text: "Salon >\n-- °C"
+                  text_font: font_labels
+                  text_color: 0xFF8800
+                  align: CENTER
+                  text_align: CENTER
+                  transform_rotation: 90
+                  x: 60
+                  y: -10
+
+        # TH06
+        - button:
+            id: tile_th06
+            align: TOP_LEFT
+            x: 125
+            y: 5
+            width: 110
+            height: 100
+            styles: style_tile_default
+            pressed:
+              styles: style_tile_pressed
+            widgets:
+              - label:
+                  id: label_temp_th06
+                  text: "TH06\n-- °C"
+                  text_font: font_labels
+                  text_color: 0x00AACC
+                  align: CENTER
+                  text_align: CENTER
+                  transform_rotation: 90
+                  x: 60
+                  y: -10
+
+        # Zewnątrz
+        - button:
+            id: tile_zewnatrz
+            align: TOP_LEFT
+            x: 5
+            y: 5
+            width: 110
+            height: 100
+            styles: style_tile_default
+            pressed:
+              styles: style_tile_pressed
+            widgets:
+              - label:
+                  id: label_temp_zewnatrz
+                  text: "Na placu\n-- °C"
+                  text_font: font_labels
+                  text_color: 0x00AACC
+                  align: CENTER
+                  text_align: CENTER
+                  transform_rotation: 90
+                  x: 60
+                  y: -20
+
+    # ==========================================
+    # STRONA 3: TERMOSTAT + VIP BUTTONS
+    # Mapowanie osi (fizyczny portrait, USB dół):
+    #   LVGL x → pion fizyczny (0=dół, 240=góra)
+    #   LVGL y → poziom fizyczny (0=lewa, 320=prawa)
+    #   LVGL width → fizyczna wysokość elementu
+    #   LVGL height → fizyczna szerokość elementu
+    #
+    # VIP kolumna (prawa): y=215, height=100 (fiz.szer.100px)
+    #   3 przyciski: width=78, x=162/82/2 (góra/środek/dół)
+    # Termostat (lewa): y=5, height=205 (fiz.szer.205px)
+    # ==========================================
+    - id: thermostat_page
+      bg_color: 0x000000
+      scrollable: false
+      widgets:
+
+        # ======= TERMOSTAT (lewa strona fizycznie, y=5-210) =======
+
+        # --- PRZYCISK POWRÓT ---
+        - button:
+            id: btn_thermo_back
+            align: TOP_LEFT
+            x: 210
+            y: 5
+            width: 28
+            height: 50
+            bg_color: 0x0D0010
+            radius: 8
+            border_width: 1
+            border_color: 0x660088
+            pressed:
+              bg_color: 0x1A0028
+              border_color: 0xFF00FF
+            on_click:
+              - lvgl.page.show:
+                  id: weather_page
+                  animation: MOVE_RIGHT
+            widgets:
+              - label:
+                  text: "<"
+                  text_font: font_timer
+                  text_color: 0xCC44FF
+                  align: CENTER
+                  transform_rotation: 90
+
+        # --- TYTUŁ "Vaillant Salon" ---
+        - label:
+            id: thermo_title
+            text: "Vaillant Salon"
+            text_font: font_labels
+            text_color: 0xFFFFFF
+            align: TOP_LEFT
+            x: 215
+            y: 60
+            transform_rotation: 90
+
+        # --- STATUS ---
+        - label:
+            id: thermo_status_label
+            text: "wyłączono"
+            text_font: font_labels
+            text_color: 0x666666
+            align: TOP_LEFT
+            x: 195
+            y: 70
+            transform_rotation: 90
+
+        # --- ARC (pierścień termostatu) ---
+        - arc:
+            id: thermo_arc
+            align: TOP_LEFT
+            x: 50
+            y: 25
+            width: 140
+            height: 165
+            min_value: 0
+            max_value: 100
+            value: 50
+            start_angle: 135
+            end_angle: 45
+            rotation: 90
+            adjustable: false
+            arc_color: 0x222222
+            arc_width: 6
+            indicator:
+              arc_color: 0x005577
+              arc_width: 6
+
+        # --- DUŻA TEMPERATURA AKTUALNA (w środku arcu) ---
+        - label:
+            id: thermo_current_temp
+            text: "--.-°C"
+            text_font: font_timer
+            text_color: 0xFFFFFF
+            align: TOP_LEFT
+            x: 130
+            y: 80
+            transform_rotation: 90
+
+        # --- TEMPERATURA ZADANA ---
+        - label:
+            id: thermo_target_temp
+            text: "--.- °C"
+            text_font: font_labels
+            text_color: 0x00AACC
+            align: TOP_LEFT
+            x: 105
+            y: 85
+            transform_rotation: 90
+
+        # --- LABEL "Zadana na sterowniku" ---
+        - label:
+            id: thermo_zadana_label
+            text: "Zadana: -- °C"
+            text_font: font_labels
+            text_color: 0xFF9800
+            align: TOP_LEFT
+            x: 30
+            y: 70
+            transform_rotation: 90
+
+        # --- PRZYCISK MINUS (-) fizycznie na dole termostatu ---
+        - button:
+            id: btn_thermo_minus
+            align: TOP_LEFT
+            x: 2
+            y: 5
+            width: 45
+            height: 45
+            styles: style_thermo_btn
+            pressed:
+              styles: style_thermo_btn_pressed
+            on_click:
+              - homeassistant.service:
+                  service: climate.set_temperature
+                  data:
+                    entity_id: climate.vaillant_salon
+                  data_template:
+                    temperature: "{{ state_attr('climate.vaillant_salon', 'temperature') | float - 0.5 }}"
+            widgets:
+              - label:
+                  text: "-"
+                  text_font: font_timer
+                  text_color: 0xFFFFFF
+                  align: CENTER
+                  transform_rotation: 90
+
+        # --- PRZYCISK PLUS (+) fizycznie na górze termostatu ---
+        - button:
+            id: btn_thermo_plus
+            align: TOP_LEFT
+            x: 2
+            y: 160
+            width: 45
+            height: 45
+            styles: style_thermo_btn
+            pressed:
+              styles: style_thermo_btn_pressed
+            on_click:
+              - homeassistant.service:
+                  service: climate.set_temperature
+                  data:
+                    entity_id: climate.vaillant_salon
+                  data_template:
+                    temperature: "{{ state_attr('climate.vaillant_salon', 'temperature') | float + 0.5 }}"
+            widgets:
+              - label:
+                  text: "+"
+                  text_font: font_timer
+                  text_color: 0xFFFFFF
+                  align: CENTER
+                  transform_rotation: 90
+
+        # ======= VIP BUTTONS (prawa kolumna fizycznie) =======
+        # Stałe y=215, height=100 (fizyczna szerokość kolumny)
+        # width=78 (fizyczna wysokość, max wypełnienie: 3*78+6gap=240)
+        # x: 162(góra), 82(środek), 2(dół)
+
+        # --- VIP GÓRA (na górze fizycznie) ---
+        - button:
+            id: btn_gora_t
+            align: TOP_LEFT
+            x: 162
+            y: 215
+            width: 78
+            height: 100
+            styles: style_btn_vip_default
+            pressed:
+              styles: style_btn_vip_pressed
+            on_click:
+              - homeassistant.service:
+                  service: script.vip_dogrzewanie_gory_1h
+            widgets:
+              - image: {src: img_gora, align: CENTER, transform_rotation: 90, x: 8, zoom: 128}
+              - label:
+                  id: label_gora_t
+                  text: "GÓRA"
+                  text_font: font_labels
+                  text_color: 0x00AACC
+                  align: CENTER
+                  text_align: CENTER
+                  transform_rotation: 90
+                  x: 35
+
+        # --- VIP DÓŁ (środek fizycznie) ---
+        - button:
+            id: btn_dol_t
+            align: TOP_LEFT
+            x: 82
+            y: 215
+            width: 78
+            height: 100
+            styles: style_btn_vip_default
+            pressed:
+              styles: style_btn_vip_pressed
+            on_click:
+              - homeassistant.service:
+                  service: script.vip_dogrzewanie_dolu_1h
+            widgets:
+              - image: {src: img_dol, align: CENTER, transform_rotation: 90, x: 8, zoom: 128}
+              - label:
+                  id: label_dol_t
+                  text: "DÓŁ"
+                  text_font: font_labels
+                  text_color: 0x00AACC
+                  align: CENTER
+                  text_align: CENTER
+                  transform_rotation: 90
+                  x: 35
+
+        # --- VIP DOM (na dole fizycznie) ---
+        - button:
+            id: btn_dom_t
+            align: TOP_LEFT
+            x: 2
+            y: 215
+            width: 78
+            height: 100
+            styles: style_btn_vip_default
+            pressed:
+              styles: style_btn_vip_pressed
+            on_click:
+              - homeassistant.service:
+                  service: script.vip_dogrzewanie_domu_1h
+            widgets:
+              - image: {src: img_dom, align: CENTER, transform_rotation: 90, x: 8, zoom: 128}
+              - label:
+                  id: label_dom_t
+                  text: "DOM"
+                  text_font: font_labels
+                  text_color: 0x00AACC
+                  align: CENTER
+                  text_align: CENTER
+                  transform_rotation: 90
+                  x: 35
