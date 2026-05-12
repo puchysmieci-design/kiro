@@ -798,26 +798,25 @@ lvgl:
 
     # ==========================================
     # STRONA 3: TERMOSTAT + VIP BUTTONS
-    # Layout identyczny jak strona 1:
-    # Lewa kolumna (x=10, w=85): Powrót + termostat info + przyciski +/-
-    # Prawa kolumna (x=105, w=125): 3x VIP (Góra, Dół, Dom)
-    # Ekran: 240w x 320h (swap_xy), treść obrócona o 90°
+    # Ekran: 240w x 320h (swap_xy)
+    # Lewa 67% (x=5, w=155): Termostat z arc + info + przyciski +/-
+    # Prawa 33% (x=165, w=70): 3x VIP (Góra, Dół, Dom)
     # ==========================================
     - id: thermostat_page
       bg_color: 0x000000
       scrollable: false
       widgets:
 
-        # --- LEWA KOLUMNA: TERMOSTAT ---
+        # ======= LEWA KOLUMNA: TERMOSTAT (67%) =======
 
-        # --- PRZYCISK POWRÓT (góra lewej kolumny) ---
+        # --- PRZYCISK POWRÓT ---
         - button:
             id: btn_thermo_back
             align: TOP_LEFT
-            x: 10
+            x: 5
             y: 5
-            width: 85
-            height: 50
+            width: 30
+            height: 60
             bg_color: 0x0D0010
             radius: 8
             border_width: 1
@@ -831,20 +830,42 @@ lvgl:
                   animation: MOVE_RIGHT
             widgets:
               - label:
-                  text: "< Wstecz"
-                  text_font: font_labels
+                  text: "<"
+                  text_font: font_timer
                   text_color: 0xCC44FF
                   align: CENTER
                   transform_rotation: 90
+
+        # --- TYTUŁ "Vaillant Salon" ---
+        - label:
+            id: thermo_title
+            text: "Vaillant Salon"
+            text_font: font_labels
+            text_color: 0xFFFFFF
+            align: TOP_LEFT
+            x: 5
+            y: 75
+            transform_rotation: 90
+
+        # --- STATUS ---
+        - label:
+            id: thermo_status_label
+            text: "wyłączono"
+            text_font: font_labels
+            text_color: 0x666666
+            align: TOP_LEFT
+            x: 25
+            y: 80
+            transform_rotation: 90
 
         # --- ARC (pierścień termostatu) ---
         - arc:
             id: thermo_arc
             align: TOP_LEFT
-            x: 10
-            y: 60
-            width: 85
-            height: 85
+            x: 35
+            y: 55
+            width: 120
+            height: 120
             min_value: 0
             max_value: 100
             value: 50
@@ -853,31 +874,20 @@ lvgl:
             rotation: 0
             adjustable: false
             arc_color: 0x222222
-            arc_width: 5
+            arc_width: 6
             indicator:
               arc_color: 0x005577
-              arc_width: 5
+              arc_width: 6
 
-        # --- TEMPERATURA AKTUALNA (w środku arcu) ---
+        # --- DUŻA TEMPERATURA AKTUALNA (w środku arcu) ---
         - label:
             id: thermo_current_temp
             text: "--.-°C"
             text_font: font_timer
             text_color: 0xFFFFFF
             align: TOP_LEFT
-            x: 30
-            y: 88
-            transform_rotation: 90
-
-        # --- STATUS (Grzanie/Bezczynność/wyłączono) ---
-        - label:
-            id: thermo_status_label
-            text: "wyłączono"
-            text_font: font_labels
-            text_color: 0x666666
-            align: TOP_LEFT
-            x: 12
-            y: 155
+            x: 75
+            y: 95
             transform_rotation: 90
 
         # --- TEMPERATURA ZADANA ---
@@ -887,8 +897,8 @@ lvgl:
             text_font: font_labels
             text_color: 0x00AACC
             align: TOP_LEFT
-            x: 32
-            y: 155
+            x: 100
+            y: 100
             transform_rotation: 90
 
         # --- LABEL "Zadana na sterowniku" ---
@@ -898,29 +908,18 @@ lvgl:
             text_font: font_labels
             text_color: 0xFF9800
             align: TOP_LEFT
-            x: 52
-            y: 155
-            transform_rotation: 90
-
-        # --- TYTUŁ ---
-        - label:
-            id: thermo_title
-            text: "Vaillant Salon"
-            text_font: font_labels
-            text_color: 0xFFFFFF
-            align: TOP_LEFT
-            x: 72
-            y: 155
+            x: 120
+            y: 90
             transform_rotation: 90
 
         # --- PRZYCISK MINUS (-) ---
         - button:
             id: btn_thermo_minus
             align: TOP_LEFT
-            x: 10
-            y: 250
-            width: 40
-            height: 60
+            x: 140
+            y: 5
+            width: 20
+            height: 155
             styles: style_thermo_btn
             pressed:
               styles: style_thermo_btn_pressed
@@ -942,10 +941,10 @@ lvgl:
         - button:
             id: btn_thermo_plus
             align: TOP_LEFT
-            x: 55
-            y: 250
-            width: 40
-            height: 60
+            x: 140
+            y: 165
+            width: 20
+            height: 155
             styles: style_thermo_btn
             pressed:
               styles: style_thermo_btn_pressed
@@ -963,16 +962,16 @@ lvgl:
                   text_color: 0xFFFFFF
                   align: CENTER
 
-        # ======= PRAWA KOLUMNA: VIP BUTTONS =======
-        # Identyczne pozycje jak na stronie 1
+        # ======= PRAWA KOLUMNA: VIP BUTTONS (33%) =======
+        # x=165, width=70, 3 przyciski po ~100h z gap 5px
 
         # --- VIP GÓRA ---
         - button:
             id: btn_gora_t
             align: TOP_LEFT
-            x: 105
+            x: 165
             y: 5
-            width: 125
+            width: 70
             height: 100
             styles: style_btn_vip_default
             pressed:
@@ -981,7 +980,7 @@ lvgl:
               - homeassistant.service:
                   service: script.vip_dogrzewanie_gory_1h
             widgets:
-              - image: {src: img_gora, align: CENTER, transform_rotation: 90, x: 40}
+              - image: {src: img_gora, align: CENTER, transform_rotation: 90, x: 15}
               - label:
                   id: label_gora_t
                   text: "VIP\nGÓRA"
@@ -990,15 +989,15 @@ lvgl:
                   align: CENTER
                   text_align: CENTER
                   transform_rotation: 90
-                  x: 75
+                  x: 40
 
         # --- VIP DÓŁ ---
         - button:
             id: btn_dol_t
             align: TOP_LEFT
-            x: 105
+            x: 165
             y: 110
-            width: 125
+            width: 70
             height: 100
             styles: style_btn_vip_default
             pressed:
@@ -1007,7 +1006,7 @@ lvgl:
               - homeassistant.service:
                   service: script.vip_dogrzewanie_dolu_1h
             widgets:
-              - image: {src: img_dol, align: CENTER, transform_rotation: 90, x: 40}
+              - image: {src: img_dol, align: CENTER, transform_rotation: 90, x: 15}
               - label:
                   id: label_dol_t
                   text: "VIP\nDÓŁ"
@@ -1016,15 +1015,15 @@ lvgl:
                   align: CENTER
                   text_align: CENTER
                   transform_rotation: 90
-                  x: 72
+                  x: 40
 
         # --- VIP DOM ---
         - button:
             id: btn_dom_t
             align: TOP_LEFT
-            x: 105
+            x: 165
             y: 215
-            width: 125
+            width: 70
             height: 100
             styles: style_btn_vip_default
             pressed:
@@ -1033,7 +1032,7 @@ lvgl:
               - homeassistant.service:
                   service: script.vip_dogrzewanie_domu_1h
             widgets:
-              - image: {src: img_dom, align: CENTER, transform_rotation: 90, x: 40}
+              - image: {src: img_dom, align: CENTER, transform_rotation: 90, x: 15}
               - label:
                   id: label_dom_t
                   text: "VIP\nDOM"
@@ -1042,4 +1041,4 @@ lvgl:
                   align: CENTER
                   text_align: CENTER
                   transform_rotation: 90
-                  x: 74
+                  x: 40
