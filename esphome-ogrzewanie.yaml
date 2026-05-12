@@ -962,15 +962,16 @@ lvgl:
                   text_color: 0xFFFFFF
                   align: CENTER
 
-        # ======= PRAWA KOLUMNA: VIP BUTTONS (33%) =======
-        # x=165, width=70, kolejność: DOM(y=5), DÓŁ(y=110), GÓRA(y=215)
+        # ======= KOLUMNA VIP BUTTONS (pionowo, stałe y=215) =======
+        # x kontroluje pozycję pionową: większe x = wyżej, mniejsze x = niżej
+        # Kolejność od góry: GÓRA(x=165), DÓŁ(x=90), DOM(x=15)
 
-        # --- VIP DOM ---
+        # --- VIP GÓRA (na górze) ---
         - button:
-            id: btn_dom_t
+            id: btn_gora_t
             align: TOP_LEFT
             x: 165
-            y: 5
+            y: 215
             width: 70
             height: 100
             styles: style_btn_vip_default
@@ -978,12 +979,12 @@ lvgl:
               styles: style_btn_vip_pressed
             on_click:
               - homeassistant.service:
-                  service: script.vip_dogrzewanie_domu_1h
+                  service: script.vip_dogrzewanie_gory_1h
             widgets:
-              - image: {src: img_dom, align: CENTER, transform_rotation: 90, x: 15}
+              - image: {src: img_gora, align: CENTER, transform_rotation: 90, x: 15}
               - label:
-                  id: label_dom_t
-                  text: "VIP\nDOM"
+                  id: label_gora_t
+                  text: "VIP\nGÓRA"
                   text_font: font_labels
                   text_color: 0x00AACC
                   align: CENTER
@@ -991,12 +992,12 @@ lvgl:
                   transform_rotation: 90
                   x: 40
 
-        # --- VIP DÓŁ ---
+        # --- VIP DÓŁ (środek) ---
         - button:
             id: btn_dol_t
             align: TOP_LEFT
-            x: 165
-            y: 110
+            x: 90
+            y: 215
             width: 70
             height: 100
             styles: style_btn_vip_default
@@ -1017,11 +1018,11 @@ lvgl:
                   transform_rotation: 90
                   x: 40
 
-        # --- VIP GÓRA ---
+        # --- VIP DOM (na dole) ---
         - button:
-            id: btn_gora_t
+            id: btn_dom_t
             align: TOP_LEFT
-            x: 165
+            x: 15
             y: 215
             width: 70
             height: 100
@@ -1030,12 +1031,12 @@ lvgl:
               styles: style_btn_vip_pressed
             on_click:
               - homeassistant.service:
-                  service: script.vip_dogrzewanie_gory_1h
+                  service: script.vip_dogrzewanie_domu_1h
             widgets:
-              - image: {src: img_gora, align: CENTER, transform_rotation: 90, x: 15}
+              - image: {src: img_dom, align: CENTER, transform_rotation: 90, x: 15}
               - label:
-                  id: label_gora_t
-                  text: "VIP\nGÓRA"
+                  id: label_dom_t
+                  text: "VIP\nDOM"
                   text_font: font_labels
                   text_color: 0x00AACC
                   align: CENTER
