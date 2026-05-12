@@ -797,39 +797,72 @@ lvgl:
                   y: -20
 
     # ==========================================
-    # STRONA 3: TERMOSTAT VAILLANT SALON
+    # STRONA 3: TERMOSTAT + VIP BUTTONS (landscape rotated)
+    # Lewa: Powrót + Termostat (arc + temp + +/-)
+    # Prawa: 3x VIP buttons (Góra, Dół, Dom)
     # ==========================================
     - id: thermostat_page
-      bg_color: 0x0A0A0A
+      bg_color: 0x000000
       scrollable: false
       widgets:
+
+        # --- PRZYCISK POWRÓT ---
+        - button:
+            id: btn_thermo_back
+            align: TOP_LEFT
+            x: 5
+            y: 5
+            width: 30
+            height: 60
+            bg_color: 0x1A1A1A
+            radius: 6
+            border_width: 1
+            border_color: 0x660088
+            pressed:
+              bg_color: 0x1A0028
+              border_color: 0xFF00FF
+            on_click:
+              - lvgl.page.show:
+                  id: weather_page
+                  animation: MOVE_RIGHT
+            widgets:
+              - label:
+                  text: "<"
+                  text_font: font_timer
+                  text_color: 0xCC44FF
+                  align: CENTER
+                  transform_rotation: 90
 
         # --- TYTUŁ "Vaillant Salon" ---
         - label:
             id: thermo_title
             text: "Vaillant Salon"
-            text_font: font_temp_small
+            text_font: font_labels
             text_color: 0xFFFFFF
-            align: TOP_MID
-            y: 8
+            align: TOP_LEFT
+            x: 8
+            y: 155
+            transform_rotation: 90
 
-        # --- STATUS (wyłączono / Grzanie / Bezczynność) ---
+        # --- STATUS ---
         - label:
             id: thermo_status_label
             text: "wyłączono"
             text_font: font_labels
             text_color: 0x666666
-            align: TOP_MID
-            y: 35
+            align: TOP_LEFT
+            x: 28
+            y: 140
+            transform_rotation: 90
 
-        # --- ARC (pierścień termostatu) ---
+        # --- ARC (pierścień) ---
         - arc:
             id: thermo_arc
-            align: CENTER
-            x: 0
-            y: -5
-            width: 170
-            height: 170
+            align: TOP_LEFT
+            x: 40
+            y: 75
+            width: 150
+            height: 150
             min_value: 0
             max_value: 100
             value: 50
@@ -838,28 +871,32 @@ lvgl:
             rotation: 0
             adjustable: false
             arc_color: 0x222222
-            arc_width: 8
+            arc_width: 6
             indicator:
               arc_color: 0x005577
-              arc_width: 8
+              arc_width: 6
 
         # --- DUŻA TEMPERATURA AKTUALNA ---
         - label:
             id: thermo_current_temp
             text: "--.-°C"
-            text_font: font_temp_large
+            text_font: font_timer
             text_color: 0xFFFFFF
-            align: CENTER
-            y: -10
+            align: TOP_LEFT
+            x: 90
+            y: 130
+            transform_rotation: 90
 
-        # --- MAŁA TEMPERATURA ZADANA (z ikoną) ---
+        # --- TEMPERATURA ZADANA ---
         - label:
             id: thermo_target_temp
             text: "--.- °C"
-            text_font: font_temp_small
+            text_font: font_labels
             text_color: 0x00AACC
-            align: CENTER
-            y: 30
+            align: TOP_LEFT
+            x: 115
+            y: 130
+            transform_rotation: 90
 
         # --- LABEL "Zadana na sterowniku" ---
         - label:
@@ -867,17 +904,19 @@ lvgl:
             text: "Zadana: -- °C"
             text_font: font_labels
             text_color: 0xFF9800
-            align: BOTTOM_MID
-            y: -60
+            align: TOP_LEFT
+            x: 135
+            y: 115
+            transform_rotation: 90
 
-        # --- PRZYCISK MINUS (-) ---
+        # --- PRZYCISK MINUS (-) na górze (bo obrócone) ---
         - button:
             id: btn_thermo_minus
-            align: BOTTOM_LEFT
-            x: 60
-            y: -15
-            width: 44
-            height: 44
+            align: TOP_LEFT
+            x: 160
+            y: 5
+            width: 55
+            height: 55
             styles: style_thermo_btn
             pressed:
               styles: style_thermo_btn_pressed
@@ -895,14 +934,14 @@ lvgl:
                   text_color: 0xFFFFFF
                   align: CENTER
 
-        # --- PRZYCISK PLUS (+) ---
+        # --- PRZYCISK PLUS (+) na dole (bo obrócone) ---
         - button:
             id: btn_thermo_plus
-            align: BOTTOM_RIGHT
-            x: -60
-            y: -15
-            width: 44
-            height: 44
+            align: TOP_LEFT
+            x: 160
+            y: 255
+            width: 55
+            height: 55
             styles: style_thermo_btn
             pressed:
               styles: style_thermo_btn_pressed
@@ -920,75 +959,82 @@ lvgl:
                   text_color: 0xFFFFFF
                   align: CENTER
 
-        # --- PRZYCISK POWER (ON/OFF) ---
-        - button:
-            id: btn_thermo_power
-            align: BOTTOM_LEFT
-            x: 10
-            y: -15
-            width: 44
-            height: 44
-            styles: style_thermo_mode_btn
-            pressed:
-              styles: style_thermo_mode_pressed
-            on_click:
-              - homeassistant.service:
-                  service: climate.turn_off
-                  data:
-                    entity_id: climate.vaillant_salon
-            widgets:
-              - label:
-                  text: "O"
-                  text_font: font_timer
-                  text_color: 0x00FF88
-                  align: CENTER
+        # ======= PRAWA KOLUMNA: VIP BUTTONS =======
 
-        # --- PRZYCISK HEAT (Płomień) ---
+        # --- VIP GÓRA ---
         - button:
-            id: btn_thermo_heat
-            align: BOTTOM_RIGHT
-            x: -10
-            y: -15
-            width: 44
-            height: 44
-            styles: style_thermo_mode_btn
-            pressed:
-              styles: style_thermo_mode_pressed
-            on_click:
-              - homeassistant.service:
-                  service: climate.set_hvac_mode
-                  data:
-                    entity_id: climate.vaillant_salon
-                    hvac_mode: heat
-            widgets:
-              - label:
-                  text: "H"
-                  text_font: font_timer
-                  text_color: 0xFF6600
-                  align: CENTER
-
-        # --- PRZYCISK POWRÓT (do weather_page) ---
-        - button:
-            id: btn_thermo_back
+            id: btn_gora_t
             align: TOP_LEFT
-            x: 5
+            x: 225
             y: 5
-            width: 40
-            height: 30
-            bg_color: 0x1A1A1A
-            radius: 6
-            border_width: 1
-            border_color: 0x444444
+            width: 90
+            height: 100
+            styles: style_btn_vip_default
             pressed:
-              bg_color: 0x002244
-              border_color: 0x00FFFF
+              styles: style_btn_vip_pressed
             on_click:
-              - lvgl.page.show:
-                  id: weather_page
-                  animation: MOVE_RIGHT
+              - homeassistant.service:
+                  service: script.vip_dogrzewanie_gory_1h
             widgets:
+              - image: {src: img_gora, align: CENTER, transform_rotation: 90, x: 25}
               - label:
-                  text: "<"
-                  text_font: font_timer
+                  id: label_gora_t
+                  text: "VIP\nGÓRA"
+                  text_font: font_labels
                   text_color: 0x00AACC
                   align: CENTER
+                  text_align: CENTER
+                  transform_rotation: 90
+                  x: 55
+
+        # --- VIP DÓŁ ---
+        - button:
+            id: btn_dol_t
+            align: TOP_LEFT
+            x: 225
+            y: 110
+            width: 90
+            height: 100
+            styles: style_btn_vip_default
+            pressed:
+              styles: style_btn_vip_pressed
+            on_click:
+              - homeassistant.service:
+                  service: script.vip_dogrzewanie_dolu_1h
+            widgets:
+              - image: {src: img_dol, align: CENTER, transform_rotation: 90, x: 25}
+              - label:
+                  id: label_dol_t
+                  text: "VIP\nDÓŁ"
+                  text_font: font_labels
+                  text_color: 0x00AACC
+                  align: CENTER
+                  text_align: CENTER
+                  transform_rotation: 90
+                  x: 55
+
+        # --- VIP DOM ---
+        - button:
+            id: btn_dom_t
+            align: TOP_LEFT
+            x: 225
+            y: 215
+            width: 90
+            height: 100
+            styles: style_btn_vip_default
+            pressed:
+              styles: style_btn_vip_pressed
+            on_click:
+              - homeassistant.service:
+                  service: script.vip_dogrzewanie_domu_1h
+            widgets:
+              - image: {src: img_dom, align: CENTER, transform_rotation: 90, x: 25}
+              - label:
+                  id: label_dom_t
+                  text: "VIP\nDOM"
+                  text_font: font_labels
+                  text_color: 0x00AACC
+                  align: CENTER
+                  text_align: CENTER
+                  transform_rotation: 90
+                  x: 55
