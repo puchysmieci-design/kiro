@@ -1028,7 +1028,12 @@ lvgl:
               - homeassistant.service:
                   service: script.vip_dogrzewanie_gory_1h
             widgets:
-              - image: {src: img_gora, align: CENTER, transform_rotation: 90, x: 8, zoom: 128}
+              - image:
+                  src: img_gora
+                  align: CENTER
+                  transform_rotation: 90
+                  x: 8
+                  transform_zoom: 0.5
               - label:
                   id: label_gora_t
                   text: "GÓRA"
@@ -1054,7 +1059,12 @@ lvgl:
               - homeassistant.service:
                   service: script.vip_dogrzewanie_dolu_1h
             widgets:
-              - image: {src: img_dol, align: CENTER, transform_rotation: 90, x: 8, zoom: 128}
+              - image:
+                  src: img_dol
+                  align: CENTER
+                  transform_rotation: 90
+                  x: 8
+                  transform_zoom: 0.5
               - label:
                   id: label_dol_t
                   text: "DÓŁ"
@@ -1080,7 +1090,12 @@ lvgl:
               - homeassistant.service:
                   service: script.vip_dogrzewanie_domu_1h
             widgets:
-              - image: {src: img_dom, align: CENTER, transform_rotation: 90, x: 8, zoom: 128}
+              - image:
+                  src: img_dom
+                  align: CENTER
+                  transform_rotation: 90
+                  x: 8
+                  transform_zoom: 0.5
               - label:
                   id: label_dom_t
                   text: "DOM"
