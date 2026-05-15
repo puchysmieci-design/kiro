@@ -1,0 +1,186 @@
+alias: VIP - Dogrzewanie Dołu (1h)
+mode: restart
+icon: mdi:heating-coil
+variables:
+  vaillant_temp: >-
+    {{ (state_attr('climate.vaillant_salon', 'current_temperature') | float(20))
+    + 1.0 }}
+sequence:
+  - choose:
+      - conditions:
+          - condition: state
+            entity_id: input_boolean.vip_dol
+            state: "on"
+        sequence:
+          - action: script.turn_off
+            target:
+              entity_id:
+                - script.vip_dogrzewanie_domu_1h
+                - script.vip_dogrzewanie_gory_1h
+                - script.vip_dogrzewanie_sypialnia_1h
+                - script.vip_dogrzewanie_biuro_1h
+                - script.vip_dogrzewanie_sara_1h
+          - action: timer.cancel
+            target:
+              entity_id: timer.czas_vip
+          - action: input_boolean.turn_off
+            target:
+              entity_id:
+                - input_boolean.vip_dom
+                - input_boolean.vip_dol
+                - input_boolean.vip_gora
+                - input_boolean.vip_sypialnia
+                - input_boolean.vip_biuro
+                - input_boolean.vip_sara
+                - input_boolean.wymuszenie_podlogowki
+          - action: switch.turn_off
+            target:
+              entity_id: switch.sonoff_10020f413c_1
+            continue_on_error: true
+          - action: climate.set_hvac_mode
+            target:
+              entity_id:
+                - climate.kaloryfer_biuro
+                - climate.kaloryfer_sara
+                - climate.kaloryfer_lewy_sypialnia
+                - climate.kaloryfer_prawy_sypialnia
+                - climate.termostat_podlogowka_laziekna
+            data:
+              hvac_mode: heat
+          - action: climate.set_temperature
+            target:
+              entity_id:
+                - climate.kaloryfer_biuro
+                - climate.kaloryfer_sara
+                - climate.kaloryfer_lewy_sypialnia
+                - climate.kaloryfer_prawy_sypialnia
+                - climate.termostat_podlogowka_laziekna
+            data:
+              temperature: 35
+          - action: climate.set_temperature
+            target:
+              entity_id: climate.vaillant_salon
+            data:
+              temperature: 16
+            continue_on_error: true
+      - conditions:
+          - condition: state
+            entity_id: input_boolean.vip_dol
+            state: "off"
+        sequence:
+          - action: script.turn_off
+            target:
+              entity_id:
+                - script.vip_dogrzewanie_domu_1h
+                - script.vip_dogrzewanie_gory_1h
+                - script.vip_dogrzewanie_sypialnia_1h
+                - script.vip_dogrzewanie_biuro_1h
+                - script.vip_dogrzewanie_sara_1h
+          - action: input_boolean.turn_off
+            target:
+              entity_id:
+                - input_boolean.vip_dom
+                - input_boolean.vip_gora
+                - input_boolean.vip_sypialnia
+                - input_boolean.vip_biuro
+                - input_boolean.vip_sara
+          - action: input_boolean.turn_on
+            target:
+              entity_id:
+                - input_boolean.vip_dol
+                - input_boolean.wymuszenie_podlogowki
+          - action: switch.turn_on
+            target:
+              entity_id: switch.sonoff_10020f413c_1
+            continue_on_error: true
+          - action: climate.set_hvac_mode
+            target:
+              entity_id:
+                - climate.kaloryfer_biuro
+                - climate.kaloryfer_sara
+                - climate.kaloryfer_lewy_sypialnia
+                - climate.kaloryfer_prawy_sypialnia
+                - climate.termostat_podlogowka_laziekna
+            data:
+              hvac_mode: "off"
+          - action: climate.set_temperature
+            target:
+              entity_id: climate.vaillant_salon
+            data:
+              temperature: "{{ vaillant_temp }}"
+            continue_on_error: true
+          - action: timer.start
+            target:
+              entity_id: timer.czas_vip
+            data:
+              duration: >-
+                {% set godziny = states('input_number.czas_dogrzewania_vip') |
+                int(1) %}  {{ '%02d:00:00' | format(godziny) }}
+          - repeat:
+              while:
+                - condition: state
+                  entity_id: timer.czas_vip
+                  state: active
+              sequence:
+                - if:
+                    - condition: template
+                      value_template: >-
+                        {{ (state_attr('climate.vaillant_salon', 'temperature')
+                        | float(0) - vaillant_temp | float(0)) | abs > 0.2 }}
+                  then:
+                    - action: climate.set_temperature
+                      target:
+                        entity_id: climate.vaillant_salon
+                      data:
+                        temperature: "{{ vaillant_temp }}"
+                      continue_on_error: true
+                - if:
+                    - condition: state
+                      entity_id: switch.sonoff_10020f413c_1
+                      state: "off"
+                  then:
+                    - action: switch.turn_on
+                      target:
+                        entity_id: switch.sonoff_10020f413c_1
+                      continue_on_error: true
+                - delay: "00:00:30"
+          - action: input_boolean.turn_off
+            target:
+              entity_id:
+                - input_boolean.vip_dom
+                - input_boolean.vip_dol
+                - input_boolean.vip_gora
+                - input_boolean.vip_sypialnia
+                - input_boolean.vip_biuro
+                - input_boolean.vip_sara
+                - input_boolean.wymuszenie_podlogowki
+          - action: switch.turn_off
+            target:
+              entity_id: switch.sonoff_10020f413c_1
+            continue_on_error: true
+          - action: climate.set_hvac_mode
+            target:
+              entity_id:
+                - climate.kaloryfer_biuro
+                - climate.kaloryfer_sara
+                - climate.kaloryfer_lewy_sypialnia
+                - climate.kaloryfer_prawy_sypialnia
+                - climate.termostat_podlogowka_laziekna
+            data:
+              hvac_mode: heat
+          - action: climate.set_temperature
+            target:
+              entity_id:
+                - climate.kaloryfer_biuro
+                - climate.kaloryfer_sara
+                - climate.kaloryfer_lewy_sypialnia
+                - climate.kaloryfer_prawy_sypialnia
+                - climate.termostat_podlogowka_laziekna
+            data:
+              temperature: 35
+          - action: climate.set_temperature
+            target:
+              entity_id: climate.vaillant_salon
+            data:
+              temperature: 16
+            continue_on_error: true
