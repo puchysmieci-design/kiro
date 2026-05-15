@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import axios from 'axios'
+import api from '../api'
 import { X, ChevronLeft, ChevronRight } from 'lucide-react'
 
 function Gallery() {
@@ -14,7 +14,7 @@ function Gallery() {
 
   const fetchImages = async () => {
     try {
-      const res = await axios.get('/api/gallery')
+      const res = await api.get('/api/gallery')
       setImages(res.data)
     } catch (err) {
       console.error('Błąd ładowania galerii:', err)

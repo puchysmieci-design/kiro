@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
-import axios from 'axios'
+import api from '../api'
 import { PlusCircle, Heart, MessageCircle, Calendar } from 'lucide-react'
 import dayjs from 'dayjs'
 import 'dayjs/locale/pl'
@@ -19,7 +19,7 @@ function Dashboard() {
 
   const fetchEntries = async () => {
     try {
-      const res = await axios.get('/api/entries')
+      const res = await api.get('/api/entries')
       setEntries(res.data)
     } catch (err) {
       console.error('Błąd ładowania wpisów:', err)

@@ -1,6 +1,6 @@
 import { Routes, Route, Navigate } from 'react-router-dom'
 import { useState, useEffect } from 'react'
-import axios from 'axios'
+import api from './api'
 import Layout from './components/Layout'
 import LoginPage from './pages/LoginPage'
 import Dashboard from './pages/Dashboard'
@@ -15,11 +15,14 @@ function App() {
 
   useEffect(() => {
     checkAuth()
+    // Bezpieczny timeout – jeśli backend nie odpowiada w 3s, pokaż login
+    const timer = setTimeout(() => setLoading(false), 3000)
+    return () => clearTimeout(timer)
   }, [])
 
   const checkAuth = async () => {
     try {
-      const res = await axios.get('/auth/current-user')
+      const res = await api.get('/auth/current-user')
       setUser(res.data)
     } catch (err) {
       setUser(null)

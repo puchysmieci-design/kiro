@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import axios from 'axios'
+import api from '../api'
 import { Edit, Save, Star, TrendingUp } from 'lucide-react'
 
 function Profiles() {
@@ -16,7 +16,7 @@ function Profiles() {
 
   const fetchProfiles = async () => {
     try {
-      const res = await axios.get('/api/profiles')
+      const res = await api.get('/api/profiles')
       if (res.data) setProfiles(res.data)
     } catch (err) {
       console.error('Błąd ładowania profili:', err)
@@ -27,7 +27,7 @@ function Profiles() {
 
   const saveProfile = async (type) => {
     try {
-      await axios.put(`/api/profiles/${type}`, profiles[type])
+      await api.put(`/api/profiles/${type}`, profiles[type])
       setEditing(null)
     } catch (err) {
       console.error('Błąd zapisu profilu:', err)

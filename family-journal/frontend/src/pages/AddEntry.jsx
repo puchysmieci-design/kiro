@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import axios from 'axios'
+import api from '../api'
 import { Upload, X, Image, Star } from 'lucide-react'
 
 function AddEntry() {
@@ -45,7 +45,7 @@ function AddEntry() {
       formData.append('profile', form.profile)
       if (form.isMilestone) formData.append('milestone', form.milestone)
 
-      await axios.post('/api/entries', formData, {
+      await api.post('/api/entries', formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       })
 

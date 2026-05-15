@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import axios from 'axios'
+import api from '../api'
 import dayjs from 'dayjs'
 import 'dayjs/locale/pl'
 import { ChevronLeft, ChevronRight, Star } from 'lucide-react'
@@ -18,7 +18,7 @@ function Calendar() {
 
   const fetchEntries = async () => {
     try {
-      const res = await axios.get('/api/entries', {
+      const res = await api.get('/api/entries', {
         params: {
           month: currentMonth.month() + 1,
           year: currentMonth.year()
