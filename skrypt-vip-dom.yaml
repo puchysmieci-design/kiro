@@ -1,4 +1,4 @@
-alias: VIP - Dogrzewanie Domu (1h)
+alias: VIP - Dogrzewanie Domu
 mode: restart
 icon: mdi:home-thermometer
 variables:

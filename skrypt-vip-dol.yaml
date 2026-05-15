@@ -1,4 +1,4 @@
-alias: VIP - Dogrzewanie Dołu (1h)
+alias: VIP - Dogrzewanie Dołu
 mode: restart
 icon: mdi:heating-coil
 variables:

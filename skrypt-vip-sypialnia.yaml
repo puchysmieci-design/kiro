@@ -1,4 +1,4 @@
-alias: VIP - Dogrzewanie Sypialnia (1h)
+alias: VIP - Dogrzewanie Sypialnia
 mode: restart
 icon: mdi:bed-king
 variables:
