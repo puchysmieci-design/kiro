@@ -26,7 +26,7 @@ cards:
         show_state: false
         tap_action:
           action: call-service
-          service: script.vip_dogrzewanie_gory_1h
+          service: script.vip_dogrzewanie_gory
         card_mod:
           style: |
             ha-card {
@@ -43,7 +43,7 @@ cards:
         show_state: false
         tap_action:
           action: call-service
-          service: script.vip_dogrzewanie_dolu_1h
+          service: script.vip_dogrzewanie_dolu
         card_mod:
           style: |
             ha-card {
@@ -60,7 +60,7 @@ cards:
         show_state: false
         tap_action:
           action: call-service
-          service: script.vip_dogrzewanie_domu_1h
+          service: script.vip_dogrzewanie_domu
         card_mod:
           style: |
             ha-card {
@@ -79,7 +79,7 @@ cards:
         show_state: false
         tap_action:
           action: call-service
-          service: script.vip_dogrzewanie_sypialnia_1h
+          service: script.vip_dogrzewanie_sypialnia
         card_mod:
           style: |
             ha-card {
@@ -96,7 +96,7 @@ cards:
         show_state: false
         tap_action:
           action: call-service
-          service: script.vip_dogrzewanie_biuro_1h
+          service: script.vip_dogrzewanie_biuro
         card_mod:
           style: |
             ha-card {
@@ -113,7 +113,7 @@ cards:
         show_state: false
         tap_action:
           action: call-service
-          service: script.vip_dogrzewanie_sara_1h
+          service: script.vip_dogrzewanie_sara
         card_mod:
           style: |
             ha-card {

@@ -15,11 +15,11 @@ sequence:
           - action: script.turn_off
             target:
               entity_id:
-                - script.vip_dogrzewanie_gory_1h
-                - script.vip_dogrzewanie_dolu_1h
-                - script.vip_dogrzewanie_domu_1h
-                - script.vip_dogrzewanie_sypialnia_1h
-                - script.vip_dogrzewanie_biuro_1h
+                - script.vip_dogrzewanie_gory
+                - script.vip_dogrzewanie_dolu
+                - script.vip_dogrzewanie_domu
+                - script.vip_dogrzewanie_sypialnia
+                - script.vip_dogrzewanie_biuro
           - action: timer.cancel
             target:
               entity_id: timer.czas_vip
@@ -71,11 +71,11 @@ sequence:
           - action: script.turn_off
             target:
               entity_id:
-                - script.vip_dogrzewanie_gory_1h
-                - script.vip_dogrzewanie_dolu_1h
-                - script.vip_dogrzewanie_domu_1h
-                - script.vip_dogrzewanie_sypialnia_1h
-                - script.vip_dogrzewanie_biuro_1h
+                - script.vip_dogrzewanie_gory
+                - script.vip_dogrzewanie_dolu
+                - script.vip_dogrzewanie_domu
+                - script.vip_dogrzewanie_sypialnia
+                - script.vip_dogrzewanie_biuro
           - action: input_boolean.turn_off
             target:
               entity_id:

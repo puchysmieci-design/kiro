@@ -557,7 +557,7 @@ lvgl:
               styles: style_btn_vip_pressed
             on_click:
               - homeassistant.service:
-                  service: script.vip_dogrzewanie_gory_1h
+                  service: script.vip_dogrzewanie_gory
             widgets:
               - image: {src: img_gora, align: CENTER, transform_rotation: 90, x: 40}
               - label:
@@ -583,7 +583,7 @@ lvgl:
               styles: style_btn_vip_pressed
             on_click:
               - homeassistant.service:
-                  service: script.vip_dogrzewanie_dolu_1h
+                  service: script.vip_dogrzewanie_dolu
             widgets:
               - image: {src: img_dol, align: CENTER, transform_rotation: 90, x: 40}
               - label:
@@ -609,7 +609,7 @@ lvgl:
               styles: style_btn_vip_pressed
             on_click:
               - homeassistant.service:
-                  service: script.vip_dogrzewanie_domu_1h
+                  service: script.vip_dogrzewanie_domu
             widgets:
               - image: {src: img_dom, align: CENTER, transform_rotation: 90, x: 40}
               - label:
@@ -986,7 +986,7 @@ lvgl:
               styles: style_btn_vip_pressed
             on_click:
               - homeassistant.service:
-                  service: script.vip_dogrzewanie_gory_1h
+                  service: script.vip_dogrzewanie_gory
             widgets:
               - image: {src: img_gora, align: CENTER, transform_rotation: 90, x: 8}
               - label:
@@ -1012,7 +1012,7 @@ lvgl:
               styles: style_btn_vip_pressed
             on_click:
               - homeassistant.service:
-                  service: script.vip_dogrzewanie_dolu_1h
+                  service: script.vip_dogrzewanie_dolu
             widgets:
               - image: {src: img_dol, align: CENTER, transform_rotation: 90, x: 8}
               - label:
@@ -1038,7 +1038,7 @@ lvgl:
               styles: style_btn_vip_pressed
             on_click:
               - homeassistant.service:
-                  service: script.vip_dogrzewanie_domu_1h
+                  service: script.vip_dogrzewanie_domu
             widgets:
               - image: {src: img_dom, align: CENTER, transform_rotation: 90, x: 8}
               - label:
