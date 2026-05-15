@@ -1,0 +1,130 @@
+type: vertical-stack
+cards:
+  - type: tile
+    entity: input_number.czas_dogrzewania_vip
+    name: Ustaw czas grzania (min)
+    icon: mdi:clock-outline
+    features:
+      - type: numeric-input
+        style: button
+    card_mod:
+      style: |
+        ha-card {
+          {% if is_state('climate.vaillant_salon', 'heat') %}
+            --tile-color: #ff5722 !important; 
+          {% else %}
+            --tile-color: #9e9e9e !important;
+          {% endif %}
+        }
+  - type: horizontal-stack
+    cards:
+      - type: button
+        entity: input_boolean.vip_gora
+        name: Góra
+        icon: mdi:radiator
+        show_name: true
+        show_state: false
+        tap_action:
+          action: call-service
+          service: script.vip_dogrzewanie_gory_1h
+        card_mod:
+          style: |
+            ha-card {
+              {% if is_state('input_boolean.vip_gora', 'on') %}
+                --ha-card-background: rgba(255, 87, 34, 0.2);
+                border: 2px solid #ff5722;
+              {% endif %}
+            }
+      - type: button
+        entity: input_boolean.vip_dol
+        name: Dół
+        icon: mdi:heating-coil
+        show_name: true
+        show_state: false
+        tap_action:
+          action: call-service
+          service: script.vip_dogrzewanie_dolu_1h
+        card_mod:
+          style: |
+            ha-card {
+              {% if is_state('input_boolean.vip_dol', 'on') %}
+                --ha-card-background: rgba(255, 87, 34, 0.2);
+                border: 2px solid #ff5722;
+              {% endif %}
+            }
+      - type: button
+        entity: input_boolean.vip_dom
+        name: Dom
+        icon: mdi:home-thermometer
+        show_name: true
+        show_state: false
+        tap_action:
+          action: call-service
+          service: script.vip_dogrzewanie_domu_1h
+        card_mod:
+          style: |
+            ha-card {
+              {% if is_state('input_boolean.vip_dom', 'on') %}
+                --ha-card-background: rgba(255, 87, 34, 0.2);
+                border: 2px solid #ff5722;
+              {% endif %}
+            }
+  - type: horizontal-stack
+    cards:
+      - type: button
+        entity: input_boolean.vip_sypialnia
+        name: Sypialnia
+        icon: mdi:bed-king
+        show_name: true
+        show_state: false
+        tap_action:
+          action: call-service
+          service: script.vip_dogrzewanie_sypialnia_1h
+        card_mod:
+          style: |
+            ha-card {
+              {% if is_state('input_boolean.vip_sypialnia', 'on') or is_state('input_boolean.vip_gora', 'on') or is_state('input_boolean.vip_dom', 'on') %}
+                --ha-card-background: rgba(255, 87, 34, 0.2);
+                border: 2px solid #ff5722;
+              {% endif %}
+            }
+      - type: button
+        entity: input_boolean.vip_biuro
+        name: Biuro
+        icon: mdi:desk
+        show_name: true
+        show_state: false
+        tap_action:
+          action: call-service
+          service: script.vip_dogrzewanie_biuro_1h
+        card_mod:
+          style: |
+            ha-card {
+              {% if is_state('input_boolean.vip_biuro', 'on') or is_state('input_boolean.vip_gora', 'on') or is_state('input_boolean.vip_dom', 'on') %}
+                --ha-card-background: rgba(255, 87, 34, 0.2);
+                border: 2px solid #ff5722;
+              {% endif %}
+            }
+      - type: button
+        entity: input_boolean.vip_sara
+        name: Sara
+        icon: mdi:human-female-girl
+        show_name: true
+        show_state: false
+        tap_action:
+          action: call-service
+          service: script.vip_dogrzewanie_sara_1h
+        card_mod:
+          style: |
+            ha-card {
+              {% if is_state('input_boolean.vip_sara', 'on') or is_state('input_boolean.vip_gora', 'on') or is_state('input_boolean.vip_dom', 'on') %}
+                --ha-card-background: rgba(255, 87, 34, 0.2);
+                border: 2px solid #ff5722;
+              {% endif %}
+            }
+  - type: entities
+    show_header_toggle: false
+    entities:
+      - entity: timer.czas_vip
+        name: Pozostały czas VIP
+        icon: mdi:timer-sand
