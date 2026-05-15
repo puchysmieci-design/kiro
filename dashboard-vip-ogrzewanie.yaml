@@ -18,15 +18,17 @@ cards:
         }
   - type: horizontal-stack
     cards:
-      - type: button
+      - show_name: true
+        show_icon: true
+        type: button
         entity: input_boolean.vip_gora
         name: Góra
         icon: mdi:radiator
-        show_name: true
         show_state: false
         tap_action:
-          action: call-service
-          service: script.vip_dogrzewanie_gory
+          action: perform-action
+          perform_action: script.vip_dogrzewanie_gory
+          target: {}
         card_mod:
           style: |
             ha-card {
@@ -35,15 +37,17 @@ cards:
                 border: 2px solid #ff5722;
               {% endif %}
             }
-      - type: button
+      - show_name: true
+        show_icon: true
+        type: button
         entity: input_boolean.vip_dol
         name: Dół
         icon: mdi:heating-coil
-        show_name: true
         show_state: false
         tap_action:
-          action: call-service
-          service: script.vip_dogrzewanie_dolu
+          action: perform-action
+          perform_action: script.vip_dogrzewanie_dolu
+          target: {}
         card_mod:
           style: |
             ha-card {
@@ -52,15 +56,17 @@ cards:
                 border: 2px solid #ff5722;
               {% endif %}
             }
-      - type: button
+      - show_name: true
+        show_icon: true
+        type: button
         entity: input_boolean.vip_dom
         name: Dom
         icon: mdi:home-thermometer
-        show_name: true
         show_state: false
         tap_action:
-          action: call-service
-          service: script.vip_dogrzewanie_domu
+          action: perform-action
+          perform_action: script.vip_dogrzewanie_domu
+          target: {}
         card_mod:
           style: |
             ha-card {
@@ -71,15 +77,17 @@ cards:
             }
   - type: horizontal-stack
     cards:
-      - type: button
+      - show_name: true
+        show_icon: true
+        type: button
         entity: input_boolean.vip_sypialnia
         name: Sypialnia
         icon: mdi:bed-king
-        show_name: true
         show_state: false
         tap_action:
-          action: call-service
-          service: script.vip_dogrzewanie_sypialnia
+          action: perform-action
+          perform_action: script.vip_dogrzewanie_sypialnia
+          target: {}
         card_mod:
           style: |
             ha-card {
@@ -88,15 +96,17 @@ cards:
                 border: 2px solid #ff5722;
               {% endif %}
             }
-      - type: button
+      - show_name: true
+        show_icon: true
+        type: button
         entity: input_boolean.vip_biuro
         name: Biuro
         icon: mdi:desk
-        show_name: true
         show_state: false
         tap_action:
-          action: call-service
-          service: script.vip_dogrzewanie_biuro
+          action: perform-action
+          perform_action: script.vip_dogrzewanie_biuro
+          target: {}
         card_mod:
           style: |
             ha-card {
@@ -105,15 +115,17 @@ cards:
                 border: 2px solid #ff5722;
               {% endif %}
             }
-      - type: button
+      - show_name: true
+        show_icon: true
+        type: button
         entity: input_boolean.vip_sara
         name: Sara
         icon: mdi:human-female-girl
-        show_name: true
         show_state: false
         tap_action:
-          action: call-service
-          service: script.vip_dogrzewanie_sara
+          action: perform-action
+          perform_action: script.vip_dogrzewanie_sara
+          target: {}
         card_mod:
           style: |
             ha-card {
