@@ -1,0 +1,60 @@
+import { Routes, Route, Navigate } from 'react-router-dom'
+import { useState, useEffect } from 'react'
+import axios from 'axios'
+import Layout from './components/Layout'
+import LoginPage from './pages/LoginPage'
+import Dashboard from './pages/Dashboard'
+import AddEntry from './pages/AddEntry'
+import Profiles from './pages/Profiles'
+import Gallery from './pages/Gallery'
+import Calendar from './pages/Calendar'
+
+function App() {
+  const [user, setUser] = useState(null)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    checkAuth()
+  }, [])
+
+  const checkAuth = async () => {
+    try {
+      const res = await axios.get('/auth/current-user')
+      setUser(res.data)
+    } catch (err) {
+      setUser(null)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-warm-50">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-4 border-primary-500 border-t-transparent mx-auto mb-4"></div>
+          <p className="text-warm-600 font-medium">Ładowanie...</p>
+        </div>
+      </div>
+    )
+  }
+
+  if (!user) {
+    return <LoginPage />
+  }
+
+  return (
+    <Layout user={user}>
+      <Routes>
+        <Route path="/" element={<Dashboard />} />
+        <Route path="/dodaj" element={<AddEntry />} />
+        <Route path="/profile" element={<Profiles />} />
+        <Route path="/galeria" element={<Gallery />} />
+        <Route path="/kalendarz" element={<Calendar />} />
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </Layout>
+  )
+}
+
+export default App
