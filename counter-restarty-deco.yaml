@@ -1,0 +1,44 @@
+# =============================================================================
+# Konfiguracja countera - DODAJ DO configuration.yaml
+# =============================================================================
+# Ten counter MUSI istnieć, żeby automatyzacja mogła go inkrementować!
+# Bez tego counter.increment nie zadziała i nie będzie zliczał restartów.
+#
+# INSTRUKCJA:
+# Wklej poniższy blok na KOŃCU swojego configuration.yaml
+# (po sekcji input_number: która już tam jest)
+# Potem zrestartuj Home Assistant.
+# =============================================================================
+
+# --- WKLEJ TO NA KOŃCU configuration.yaml ---
+
+counter:
+  licznik_restartow_deco_przez_sonoff:
+    name: "Licznik restartów Deco przez Sonoff"
+    initial: 0
+    step: 1
+    icon: mdi:restart-alert
+    restore: true  # zachowuje wartość po restarcie HA
+
+# =============================================================================
+# PEŁNY CONFIGURATION.YAML Z DODANYM COUNTEREM (dla odniesienia):
+# =============================================================================
+# Twój plik powinien wyglądać mniej więcej tak (na końcu):
+#
+# input_number:
+#   zadana_temp_salon:
+#     name: "Zadana Temperatura Salon"
+#     min: 15
+#     max: 28
+#     step: 0.5
+#     unit_of_measurement: "°C"
+#     mode: slider
+#
+# counter:                                    <-- DODAJ TEN BLOK
+#   licznik_restartow_deco_przez_sonoff:
+#     name: "Licznik restartów Deco przez Sonoff"
+#     initial: 0
+#     step: 1
+#     icon: mdi:restart-alert
+#     restore: true
+# =============================================================================
