@@ -1,0 +1,161 @@
+# Loads default set of integrations. Do not remove.
+default_config:
+
+# Load frontend themes from the themes folder
+frontend:
+  themes: !include_dir_merge_named themes
+
+automation: !include automations.yaml
+script: !include scripts.yaml
+scene: !include scenes.yaml
+
+# Niezbędne do działania wolnych komend shell
+wake_on_lan:
+
+# ==========================================
+# --- TEMPLATE SENSORY ---
+# ==========================================
+template:
+  # 1. Twój licznik czasu dla ESPHome
+  - trigger:
+      - platform: time_pattern
+        seconds: "/1" # Odświeża status co 1 sekundę
+    sensor:
+      - name: "ESPHome Czas VIP Odliczanie"
+        state: >
+          {% if is_state('timer.czas_vip', 'active') %}
+            {% set finish = state_attr('timer.czas_vip', 'finishes_at') %}
+            {% if finish %}
+              {{ (as_timestamp(finish) - as_timestamp(now())) | timestamp_custom('%H:%M:%S', false) }}
+            {% else %}
+              AKTYWNY
+            {% endif %}
+          {% else %}
+            GOTOWY
+          {% endif %}
+
+  # 2. NOWY licznik gazu dla Vaillanta (Wersja Kuloodporna)
+  - sensor:
+      - name: "Zużycie Gazu (Całkowite w m3)"
+        unique_id: vaillant_zuzycie_gazu_calkowite
+        unit_of_measurement: "m³"
+        device_class: gas
+        state_class: total_increasing
+        icon: mdi:fire
+        state: >
+          {# Pobieramy aktualny stan z pieca. Jeśli jest błąd, wpisujemy -1 #}
+          {% set co = states('sensor.ebusd_bai_prenergycounthc1') | float(-1) %}
+          {% set cwu = states('sensor.ebusd_bai_prenergycounthwc1') | float(-1) %}
+          
+          {# TUTAJ WPISZ WSPÓŁCZYNNIK Z OSTATNIEJ FAKTURY #}
+          {% set wspolczynnik = 11.0 %} 
+          
+          {# Zabezpieczenie: Przeliczamy tylko gdy piec zwraca wartości wyższe od 0 #}
+          {% if co > 0 and cwu > 0 %}
+            {{ ((co + cwu) / 1000 / wspolczynnik) | round(2) }}
+          {% else %}
+            {# Jeśli piec wyśle 0 lub błąd, zamrażamy ostatnią poprawną wartość #}
+            {{ this.state | default(0) }}
+          {% endif %}
+        availability: >
+          {# Sensor działa tylko wtedy, gdy odczyty z pieca są prawidłowymi cyframi #}
+          {{ states('sensor.ebusd_bai_prenergycounthc1') | is_number and states('sensor.ebusd_bai_prenergycounthwc1') | is_number }}
+
+
+# ==========================================
+# --- TWOJE URZĄDZENIA ---
+# ==========================================
+
+# 1. Sensory odczytujące dane z pieca (Ebusd)
+command_line:
+  # A. Temperatura ZADANA (Odczyt wymuszony -f, szybki timeout)
+  - sensor:
+      name: "Vaillant - Zadana Temperatura (Odczyt)"
+      unique_id: vaillant_hc1_odczyt_poll
+      command: 'echo "read -f -c 470 Hc1DayTemp" | nc -w 1 192.168.0.145 8888'
+      unit_of_measurement: "°C"
+      scan_interval: 60
+      value_template: >
+        {% set temp = value | float(-999) %}
+        {% if temp > 5.0 %}
+          {{ temp }}
+        {% else %}
+          {{ states('sensor.vaillant_zadana_temperatura_odczyt') }}
+        {% endif %}
+
+  # B. Temperatura POKOJOWA (Odczyt z cache, bezpieczny timeout)
+  - sensor:
+      name: "Vaillant - Temperatura Wewnetrzna"
+      unique_id: vaillant_hc1_pokojowa_poll
+      command: 'echo "read -c 470 DisplayedRoomTemp" | nc -w 5 192.168.0.145 8888'
+      unit_of_measurement: "°C"
+      scan_interval: 300
+      value_template: >
+        {% set temp = value | float(-999) %}
+        {% if temp > 5.0 %}
+          {{ temp }}
+        {% else %}
+          {{ states('sensor.vaillant_temperatura_wewnetrzna') }}
+        {% endif %}
+
+  # C. Temperatura ZEWNĘTRZNA (Odczyt z cache, rzadki update)
+  - sensor:
+      name: "Vaillant - Temperatura Zewnetrzna"
+      unique_id: vaillant_outside_temp_poll
+      command: 'echo "read -c 470 DisplayedOutsideTemp" | nc -w 5 192.168.0.145 8888'
+      unit_of_measurement: "°C"
+      scan_interval: 3600
+      value_template: >
+        {% set temp = value | float(-999) %}
+        {% if temp != -999 %}
+          {{ temp }}
+        {% else %}
+          {{ states('sensor.vaillant_temperatura_zewnetrzna') }}
+        {% endif %}
+
+# 2. Pomocniczy "fałszywy" przełącznik dla termostatu
+input_boolean:
+  vaillant_grzanie_dummy:
+    name: Vaillant Stan Grzania
+    icon: mdi:fire
+
+# 3. Główny Termostat (To da Ci pokrętło na Dashboardzie)
+climate:
+  - platform: generic_thermostat
+    name: Vaillant Salon
+    unique_id: vaillant_salon_thermostat_knob
+    heater: input_boolean.vaillant_grzanie_dummy
+    target_sensor: sensor.vaillant_temperatura_wewnetrzna
+    min_temp: 15
+    max_temp: 28
+    ac_mode: false
+    target_temp_step: 0.5
+    cold_tolerance: 0.3
+    hot_tolerance: 0.3
+    precision: 0.1
+
+shell_command:
+  # ZMIANA: Zaktualizowano IP do 192.168.0.145
+  ustaw_temp_salon: >
+    /bin/bash -c 'echo "write -c 470 Hc1DayTemp {{ temp | replace(",", ".") }}" | nc -w 2 192.168.0.145 8888'
+
+# Opcjonalnie: Stary suwak (możesz usunąć, jeśli używasz już tylko termostatu)
+input_number:
+  zadana_temp_salon:
+    name: "Zadana Temperatura Salon"
+    min: 15
+    max: 28
+    step: 0.5
+    unit_of_measurement: "°C"
+    mode: slider
+
+# ==========================================
+# --- COUNTER (LICZNIKI) ---
+# ==========================================
+counter:
+  licznik_restartow_deco_przez_sonoff:
+    name: "Licznik restartów Deco przez Sonoff"
+    initial: 0
+    step: 1
+    icon: mdi:restart-alert
+    restore: true  # zachowuje wartość po restarcie HA
