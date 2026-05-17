@@ -1,0 +1,29 @@
+# =============================================================================
+# Dashboard card - Licznik restartów Deco
+# =============================================================================
+
+# Karta podstawowa (entity)
+type: entity
+entity: counter.licznik_restartow_deco_przez_sonoff
+name: "Liczba awarii Sonoff (restart Deco)"
+icon: mdi:wifi-alert
+grid_options:
+  columns: 6
+  rows: 2
+
+# =============================================================================
+# OPCJONALNIE: Rozbudowana karta z dodatkowymi informacjami
+# =============================================================================
+# Możesz użyć tej karty zamiast podstawowej - pokazuje więcej danych:
+#
+# type: vertical-stack
+# cards:
+#   - type: entity
+#     entity: counter.licznik_restartow_deco_przez_sonoff
+#     name: "Restarty Deco (awarie Sonoff)"
+#     icon: mdi:wifi-alert
+#   - type: markdown
+#     content: >-
+#       **Ostatni restart:**
+#       {{ states.automation.ratunkowy_restart_sieci_deco_sonoff_offline.attributes.last_triggered
+#          | default('nigdy') }}
