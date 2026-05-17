@@ -1,13 +1,21 @@
 # =============================================================================
 # Dashboard card - Licznik restartów Deco (TYLKO ODCZYT, bez przycisków)
 # =============================================================================
+# Problem: type: entity i type: sensor po kliknięciu otwierają dialog
+# countera z przyciskami Zwiększ/Zmniejsz/Reset.
+#
+# Rozwiązanie: type: tile z tap_action: none — kliknięcie nic nie robi,
+# nie otwiera się żaden dialog.
+# =============================================================================
 
-# Użycie type: sensor zamiast type: entity — nie pokazuje przycisków
-# Zwiększ/Zmniejsz/Reset
-type: sensor
+type: tile
 entity: counter.licznik_restartow_deco_przez_sonoff
 name: "Liczba awarii Sonoff (restart Deco)"
 icon: mdi:wifi-alert
+tap_action:
+  action: none
+hold_action:
+  action: none
 grid_options:
   columns: 6
   rows: 2
