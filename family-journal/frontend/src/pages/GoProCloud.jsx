@@ -1,64 +1,70 @@
-import { useState } from 'react'
-import { Camera, ExternalLink, AlertTriangle } from 'lucide-react'
+import { Camera, ExternalLink, Download } from 'lucide-react'
 
 function GoProCloud() {
-  const [showHelp, setShowHelp] = useState(false)
-  const GOPRO_URL = 'https://gopro.com/media-library/'
-
   return (
-    <div>
+    <div className="max-w-2xl mx-auto">
       {/* Header */}
-      <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center gap-3">
-          <div className="w-9 h-9 bg-blue-600 rounded-lg flex items-center justify-center">
-            <Camera className="text-white" size={20} />
-          </div>
-          <h2 className="font-display font-bold text-xl text-warm-900">GoPro Cloud</h2>
+      <div className="text-center mb-8">
+        <div className="w-16 h-16 bg-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
+          <Camera className="text-white" size={32} />
         </div>
-        <div className="flex items-center gap-2">
-          <button
-            onClick={() => setShowHelp(!showHelp)}
-            className="text-sm text-warm-500 hover:text-warm-700"
-          >
-            {showHelp ? 'Ukryj pomoc' : 'Pomoc'}
-          </button>
-          <a
-            href={GOPRO_URL}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-sm text-primary-500 hover:text-primary-600 flex items-center gap-1"
-          >
-            <ExternalLink size={14} />
-            Nowa karta
-          </a>
-        </div>
+        <h2 className="font-display font-bold text-2xl text-warm-900 mb-2">GoPro Cloud</h2>
+        <p className="text-warm-500">
+          Przeglądaj i pobieraj filmy z chmury GoPro, a następnie dodaj je do dziennika.
+        </p>
       </div>
 
-      {/* Help banner */}
-      {showHelp && (
-        <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-4 flex items-start gap-3">
-          <AlertTriangle size={18} className="text-amber-500 mt-0.5 shrink-0" />
-          <div className="text-sm text-amber-800">
-            <p className="font-medium mb-1">Jeśli ramka jest pusta lub nie ładuje się:</p>
-            <p>
-              GoPro może blokować wyświetlanie swojej strony w ramce (ze względów bezpieczeństwa). 
-              W takim wypadku kliknij "Nowa karta" aby otworzyć GoPro Media Library w osobnej karcie przeglądarki, 
-              pobierz zdjęcia/filmy i dodaj je do dziennika przez "Dodaj wpis".
-            </p>
+      {/* Main link */}
+      <div className="card text-center mb-6">
+        <a
+          href="https://gopro.com/media-library/"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="btn-primary inline-flex items-center gap-3 text-lg px-8 py-4"
+        >
+          <Camera size={22} />
+          Otwórz GoPro Media Library
+          <ExternalLink size={16} />
+        </a>
+        <p className="text-warm-400 text-sm mt-4">
+          Otwiera się w nowej karcie – zaloguj się swoim kontem GoPro
+        </p>
+      </div>
+
+      {/* Instructions */}
+      <div className="card">
+        <h3 className="font-display font-semibold text-lg text-warm-800 mb-4">
+          Jak dodać film z GoPro do dziennika?
+        </h3>
+        <div className="space-y-4">
+          <div className="flex items-start gap-4">
+            <div className="w-8 h-8 bg-primary-100 rounded-full flex items-center justify-center shrink-0 font-bold text-primary-600 text-sm">
+              1
+            </div>
+            <div>
+              <p className="font-medium text-warm-800">Otwórz GoPro Media Library</p>
+              <p className="text-sm text-warm-500">Kliknij przycisk powyżej i zaloguj się swoim kontem GoPro</p>
+            </div>
+          </div>
+          <div className="flex items-start gap-4">
+            <div className="w-8 h-8 bg-primary-100 rounded-full flex items-center justify-center shrink-0 font-bold text-primary-600 text-sm">
+              2
+            </div>
+            <div>
+              <p className="font-medium text-warm-800">Pobierz zdjęcie lub film</p>
+              <p className="text-sm text-warm-500">Znajdź materiał który chcesz dodać i kliknij ikonę pobierania</p>
+            </div>
+          </div>
+          <div className="flex items-start gap-4">
+            <div className="w-8 h-8 bg-primary-100 rounded-full flex items-center justify-center shrink-0 font-bold text-primary-600 text-sm">
+              3
+            </div>
+            <div>
+              <p className="font-medium text-warm-800">Dodaj do dziennika</p>
+              <p className="text-sm text-warm-500">Wróć tutaj, kliknij "Dodaj wpis" i wrzuć pobrany plik – trafi na Twój Google Drive</p>
+            </div>
           </div>
         </div>
-      )}
-
-      {/* GoPro iframe - pełna wysokość */}
-      <div className="rounded-2xl overflow-hidden border border-warm-200 shadow-sm bg-white">
-        <iframe
-          src={GOPRO_URL}
-          className="w-full border-0"
-          style={{ height: 'calc(100vh - 160px)', minHeight: '600px' }}
-          title="GoPro Media Library"
-          allow="camera; microphone; fullscreen"
-          referrerPolicy="no-referrer-when-downgrade"
-        />
       </div>
     </div>
   )

@@ -8,7 +8,8 @@ router.get('/google', passport.authenticate('google', {
   scope: [
     'profile',
     'email',
-    'https://www.googleapis.com/auth/drive.file'
+    'https://www.googleapis.com/auth/drive.file',
+    'https://www.googleapis.com/auth/photoslibrary.readonly'
   ],
   accessType: 'offline',
   prompt: 'consent',

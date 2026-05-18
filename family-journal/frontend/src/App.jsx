@@ -11,6 +11,7 @@ import Calendar from './pages/Calendar'
 import Photobook from './pages/Photobook'
 import Family from './pages/Family'
 import GoProCloud from './pages/GoProCloud'
+import GooglePhotos from './pages/GooglePhotos'
 
 function App() {
   const [user, setUser] = useState(null)
@@ -60,6 +61,7 @@ function App() {
         <Route path="/fotoksiazki" element={<Photobook />} />
         <Route path="/rodzina" element={<Family />} />
         <Route path="/gopro" element={<GoProCloud />} />
+        <Route path="/google-photos" element={<GooglePhotos />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </Layout>

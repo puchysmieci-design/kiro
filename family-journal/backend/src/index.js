@@ -10,6 +10,7 @@ import profilesRoutes from './routes/profiles.js'
 import galleryRoutes from './routes/gallery.js'
 import photobooksRoutes from './routes/photobooks.js'
 import familyRoutes from './routes/family.js'
+import photosRoutes from './routes/photos.js'
 
 const app = express()
 const PORT = process.env.PORT || 5000
@@ -47,7 +48,8 @@ passport.use(new GoogleStrategy({
   scope: [
     'profile',
     'email',
-    'https://www.googleapis.com/auth/drive.file'
+    'https://www.googleapis.com/auth/drive.file',
+    'https://www.googleapis.com/auth/photoslibrary.readonly'
   ]
 }, (accessToken, refreshToken, profile, done) => {
   // Przechowujemy tokeny w sesji
@@ -77,6 +79,7 @@ app.use('/api/profiles', profilesRoutes)
 app.use('/api/gallery', galleryRoutes)
 app.use('/api/photobooks', photobooksRoutes)
 app.use('/api/family', familyRoutes)
+app.use('/api/photos', photosRoutes)
 
 // Health check
 app.get('/api/health', (req, res) => {
