@@ -59,7 +59,7 @@ function AddEntry() {
   }
 
   return (
-    <div className="sm:ml-56 max-w-2xl">
+    <div className="max-w-2xl">
       <h2 className="font-display font-bold text-2xl text-warm-900 mb-6">
         Nowy wpis
       </h2>

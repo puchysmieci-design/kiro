@@ -30,7 +30,7 @@ function Dashboard() {
 
   if (loading) {
     return (
-      <div className="sm:ml-56">
+      <div className="">
         <div className="flex justify-center py-12">
           <div className="animate-spin rounded-full h-8 w-8 border-4 border-primary-500 border-t-transparent"></div>
         </div>
@@ -39,7 +39,7 @@ function Dashboard() {
   }
 
   return (
-    <div className="sm:ml-56">
+    <div className="">
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>

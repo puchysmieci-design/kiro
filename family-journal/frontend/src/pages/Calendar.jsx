@@ -63,7 +63,7 @@ function Calendar() {
   const dayEntries = selectedDay ? getEntriesForDay(selectedDay) : []
 
   return (
-    <div className="sm:ml-56">
+    <div className="">
       <h2 className="font-display font-bold text-2xl text-warm-900 mb-6">Kalendarz</h2>
 
       <div className="card">

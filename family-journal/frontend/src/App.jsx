@@ -9,6 +9,7 @@ import Profiles from './pages/Profiles'
 import Gallery from './pages/Gallery'
 import Calendar from './pages/Calendar'
 import Photobook from './pages/Photobook'
+import Family from './pages/Family'
 
 function App() {
   const [user, setUser] = useState(null)
@@ -50,12 +51,13 @@ function App() {
   return (
     <Layout user={user}>
       <Routes>
-        <Route path="/" element={<Dashboard />} />
+        <Route path="/" element={<Calendar />} />
         <Route path="/dodaj" element={<AddEntry />} />
         <Route path="/profile" element={<Profiles />} />
         <Route path="/galeria" element={<Gallery />} />
         <Route path="/kalendarz" element={<Calendar />} />
         <Route path="/fotoksiazki" element={<Photobook />} />
+        <Route path="/rodzina" element={<Family />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </Layout>

@@ -122,7 +122,7 @@ function Photobook() {
 
   if (loading) {
     return (
-      <div className="sm:ml-56 flex justify-center py-12">
+      <div className="flex justify-center py-12">
         <div className="animate-spin rounded-full h-8 w-8 border-4 border-primary-500 border-t-transparent"></div>
       </div>
     )
@@ -131,7 +131,7 @@ function Photobook() {
   // Widok szczegółowy fotoksiążki
   if (selectedBook) {
     return (
-      <div className="sm:ml-56">
+      <div className="">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <div>
@@ -232,7 +232,7 @@ function Photobook() {
 
   // Lista fotoksiążek
   return (
-    <div className="sm:ml-56">
+    <div className="">
       <div className="flex items-center justify-between mb-6">
         <div>
           <h2 className="font-display font-bold text-2xl text-warm-900">Fotoksiążki</h2>
