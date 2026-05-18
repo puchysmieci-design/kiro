@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom'
-import { Home, PlusCircle, Users, Image, CalendarDays, LogOut } from 'lucide-react'
+import { Home, PlusCircle, Users, Image, CalendarDays, BookOpen, LogOut } from 'lucide-react'
 
 function Layout({ user, children }) {
   const location = useLocation()
@@ -10,6 +10,7 @@ function Layout({ user, children }) {
     { path: '/profile', label: 'Profile', icon: Users },
     { path: '/galeria', label: 'Galeria', icon: Image },
     { path: '/kalendarz', label: 'Kalendarz', icon: CalendarDays },
+    { path: '/fotoksiazki', label: 'Fotoksiążki', icon: BookOpen },
   ]
 
   const isActive = (path) => location.pathname === path

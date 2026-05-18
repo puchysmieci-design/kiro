@@ -8,6 +8,7 @@ import authRoutes from './routes/auth.js'
 import entriesRoutes from './routes/entries.js'
 import profilesRoutes from './routes/profiles.js'
 import galleryRoutes from './routes/gallery.js'
+import photobooksRoutes from './routes/photobooks.js'
 
 const app = express()
 const PORT = process.env.PORT || 5000
@@ -73,6 +74,7 @@ app.use('/auth', authRoutes)
 app.use('/api/entries', entriesRoutes)
 app.use('/api/profiles', profilesRoutes)
 app.use('/api/gallery', galleryRoutes)
+app.use('/api/photobooks', photobooksRoutes)
 
 // Health check
 app.get('/api/health', (req, res) => {

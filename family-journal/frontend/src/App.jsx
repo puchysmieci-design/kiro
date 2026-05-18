@@ -8,6 +8,7 @@ import AddEntry from './pages/AddEntry'
 import Profiles from './pages/Profiles'
 import Gallery from './pages/Gallery'
 import Calendar from './pages/Calendar'
+import Photobook from './pages/Photobook'
 
 function App() {
   const [user, setUser] = useState(null)
@@ -54,6 +55,7 @@ function App() {
         <Route path="/profile" element={<Profiles />} />
         <Route path="/galeria" element={<Gallery />} />
         <Route path="/kalendarz" element={<Calendar />} />
+        <Route path="/fotoksiazki" element={<Photobook />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </Layout>
