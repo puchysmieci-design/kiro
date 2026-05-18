@@ -9,7 +9,8 @@ router.get('/google', passport.authenticate('google', {
     'profile',
     'email',
     'https://www.googleapis.com/auth/drive.file',
-    'https://www.googleapis.com/auth/photoslibrary.readonly'
+    'https://www.googleapis.com/auth/photoslibrary.readonly',
+    'https://www.googleapis.com/auth/youtube.readonly'
   ],
   accessType: 'offline',
   prompt: 'consent',

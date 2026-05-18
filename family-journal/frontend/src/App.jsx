@@ -12,6 +12,7 @@ import Photobook from './pages/Photobook'
 import Family from './pages/Family'
 import GoProCloud from './pages/GoProCloud'
 import GooglePhotos from './pages/GooglePhotos'
+import YouTube from './pages/YouTube'
 
 function App() {
   const [user, setUser] = useState(null)
@@ -62,6 +63,7 @@ function App() {
         <Route path="/rodzina" element={<Family />} />
         <Route path="/gopro" element={<GoProCloud />} />
         <Route path="/google-photos" element={<GooglePhotos />} />
+        <Route path="/youtube" element={<YouTube />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </Layout>
