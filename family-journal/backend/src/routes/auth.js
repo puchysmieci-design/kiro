@@ -39,6 +39,18 @@ router.get('/current-user', (req, res) => {
   })
 })
 
+// Debug: sprawdź scope tokena
+router.get('/debug-token', (req, res) => {
+  if (!req.user) {
+    return res.status(401).json({ error: 'Nie zalogowany' })
+  }
+  // Sprawdź jakie scope ma token
+  fetch(`https://oauth2.googleapis.com/tokeninfo?access_token=${req.user.accessToken}`)
+    .then(r => r.json())
+    .then(data => res.json({ tokenInfo: data, userScopes: data.scope }))
+    .catch(err => res.json({ error: err.message }))
+})
+
 // Wyloguj
 router.get('/logout', (req, res) => {
   req.logout((err) => {
